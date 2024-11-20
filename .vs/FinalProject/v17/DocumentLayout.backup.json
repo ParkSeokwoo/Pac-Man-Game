@@ -1,25 +1,29 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\james\\source\\repos\\FinalProject\\",
+  "WorkspaceRootPath": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Sphere.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|solutionrelative:FinalProject\\Sphere.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Shape3D.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|solutionrelative:FinalProject\\Shape3D.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|solutionrelative:FinalProject\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Timer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Sphere.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|solutionrelative:FinalProject\\Sphere.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Shape3D.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|solutionrelative:FinalProject\\Shape3D.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Timer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|solutionrelative:FinalProject\\Timer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Map.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Map.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{4EF4400F-94AB-4960-B773-D32DDCE59F87}|FinalProject\\FinalProject.vcxproj|solutionrelative:FinalProject\\Map.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
@@ -34,13 +38,13 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "Main.cpp",
-              "DocumentMoniker": "C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Main.cpp",
+              "DocumentMoniker": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Main.cpp",
               "RelativeDocumentMoniker": "FinalProject\\Main.cpp",
-              "ToolTip": "C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Main.cpp",
+              "ToolTip": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Main.cpp",
               "RelativeToolTip": "FinalProject\\Main.cpp",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAAABsAAABHAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-11-16T16:57:31.214Z",
               "IsPinned": true,
@@ -49,23 +53,36 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": ".gitignore",
+              "DocumentMoniker": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\.gitignore",
+              "RelativeDocumentMoniker": ".gitignore",
+              "ToolTip": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\.gitignore",
+              "RelativeToolTip": ".gitignore",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-11-20T13:57:36.047Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "Sphere.cpp",
-              "DocumentMoniker": "C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Sphere.cpp",
+              "DocumentMoniker": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Sphere.cpp",
               "RelativeDocumentMoniker": "FinalProject\\Sphere.cpp",
-              "ToolTip": "C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Sphere.cpp",
+              "ToolTip": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Sphere.cpp",
               "RelativeToolTip": "FinalProject\\Sphere.cpp",
-              "ViewState": "AgIAAKEAAAAAAAAAAAAwwLcAAAAXAAAAAAAAAA==",
+              "ViewState": "AgIAAKEAAAAAAAAAAAAwwKQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-11-20T08:42:44.052Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "Map.cpp",
-              "DocumentMoniker": "C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Map.cpp",
+              "DocumentMoniker": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Map.cpp",
               "RelativeDocumentMoniker": "FinalProject\\Map.cpp",
-              "ToolTip": "C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Map.cpp",
+              "ToolTip": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Map.cpp",
               "RelativeToolTip": "FinalProject\\Map.cpp",
               "ViewState": "AgIAAOwAAAAAAAAAAAAAALIAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
@@ -73,28 +90,31 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "Shape3D.cpp",
-              "DocumentMoniker": "C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Shape3D.cpp",
+              "DocumentMoniker": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Shape3D.cpp",
               "RelativeDocumentMoniker": "FinalProject\\Shape3D.cpp",
-              "ToolTip": "C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Shape3D.cpp",
+              "ToolTip": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Shape3D.cpp",
               "RelativeToolTip": "FinalProject\\Shape3D.cpp",
               "ViewState": "AgIAABIAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-11-17T18:08:12.98Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-17T18:08:12.98Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Timer.cpp",
-              "DocumentMoniker": "C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Timer.cpp",
+              "DocumentMoniker": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Timer.cpp",
               "RelativeDocumentMoniker": "FinalProject\\Timer.cpp",
-              "ToolTip": "C:\\Users\\james\\source\\repos\\FinalProject\\FinalProject\\Timer.cpp",
+              "ToolTip": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\FinalProject\\Timer.cpp",
               "RelativeToolTip": "FinalProject\\Timer.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAEYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-11-17T18:01:30.366Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
             }
           ]
         }

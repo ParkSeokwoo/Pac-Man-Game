@@ -58,10 +58,14 @@
               "RelativeDocumentMoniker": ".gitignore",
               "ToolTip": "C:\\Users\\james\\source\\repos\\FinalProject\\Pac-Man-game\\.gitignore",
               "RelativeToolTip": ".gitignore",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAAC4AAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2024-11-20T13:57:36.047Z",
+              "WhenOpened": "2024-11-20T13:59:55.502Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
             },
             {
               "$type": "Document",
@@ -73,8 +77,7 @@
               "RelativeToolTip": "FinalProject\\Sphere.cpp",
               "ViewState": "AgIAAKEAAAAAAAAAAAAwwKQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-11-20T08:42:44.052Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-11-20T08:42:44.052Z"
             },
             {
               "$type": "Document",
@@ -111,10 +114,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAEYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-11-17T18:01:30.366Z"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
             }
           ]
         }
