@@ -22,10 +22,6 @@ Light light(BOUNDARY_X, BOUNDARY_Y, BOUNDARY_X / 2, GL_LIGHT0);
 
 PacMan pacman(BLOCK_SIZE / 2.0f, 20, 20, false);
 
-//Ghost blinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::BLINKY);
-//Ghost pinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::PINKY);
-//Ghost inky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::INKY);
-//Ghost clyde(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::CLYDE);
 Ghost blinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::BLINKY);
 Ghost pinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::PINKY);
 Ghost inky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::INKY);
