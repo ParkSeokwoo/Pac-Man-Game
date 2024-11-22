@@ -161,6 +161,44 @@ void Block::draw() const {
 			glEnd();
 			break;
 		}
+		case BOX_TYPE::ST8: {
+			glPushMatrix();
+			glBegin(GL_QUADS);
+			glColor3f(1.0f, 0.8f, 0.9f);
+			glVertex3f(-width / 2, -height / 2, 0.0f); 
+			glVertex3f(-width / 2, height / 2, 0.0f);  
+			glVertex3f(-width / 8, height / 2, 0.0f);
+			glVertex3f(-width / 8, -height / 2, 0.0f);
+			glEnd();
+			glPopMatrix();
+			break;
+		}
+		case BOX_TYPE::ST9: {
+			glBegin(GL_LINES);
+			glVertex3f(-width / 2, -height / 2, 0.0f);
+			glVertex3f(-width / 2, height / 2, 0.0f);
+
+			glVertex3f(0.0f, -height / 2, 0.0f);
+			glVertex3f(0.0f, height / 2, 0.0f);
+
+			glVertex3f(-width / 2, -height / 2, 0.0f);
+			glVertex3f(0, -height / 2, 0.0f);
+			glEnd();
+			break;
+		}
+		case BOX_TYPE::ST10: {
+			glBegin(GL_LINES);
+			glVertex3f(-width / 2, -height / 2, 0.0f);
+			glVertex3f(-width / 2, height / 2, 0.0f);
+
+			glVertex3f(0.0f, -height / 2, 0.0f);
+			glVertex3f(0.0f, height / 2, 0.0f);
+
+			glVertex3f(-width / 2, height / 2, 0.0f);
+			glVertex3f(0, height / 2, 0.0f);
+			glEnd();
+			break;
+		}
 		}
 		glPopMatrix();
 	}
@@ -254,8 +292,13 @@ void Map::createMap() {
 		blocks[3][26].setPoint(Block::POINT_TYPE::BIG);
 		blocks[23][1].setPoint(Block::POINT_TYPE::BIG);
 		blocks[23][26].setPoint(Block::POINT_TYPE::BIG);
-
+		
+		blocks[12][13].setBoxType(Block::BOX_TYPE::ST8);
+		blocks[12][14].setBoxType(Block::BOX_TYPE::ST8);
+		blocks[12][12].setBoxType(Block::BOX_TYPE::ST9);
+		blocks[12][15].setBoxType(Block::BOX_TYPE::ST10);
 		file.close();
+		
 		float x = LEFT_BOUNDARY;
 		float y = TOP_BOUNDARY;
 		for (int i = 0; i < blocks.size(); i++) {

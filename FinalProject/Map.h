@@ -10,7 +10,7 @@ class Block : public Shape3D
 {
 public:
 	Block();
-	enum BOX_TYPE { NONE, ST1, ST2, ST3, ST4, ST5, ST6, ST7 };
+	enum BOX_TYPE { NONE, ST1, ST2, ST3, ST4, ST5, ST6, ST7, ST8, ST9, ST10 };
 	//16¹ø ¼öÁ¤
 	enum POINT_TYPE { NOPT, SMALL, BIG };
 	//

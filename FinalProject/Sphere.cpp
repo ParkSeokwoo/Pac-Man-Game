@@ -145,7 +145,7 @@ void Sphere::draw() const {
 	glMaterialfv(GL_FRONT, GL_SHININESS, shininessArray);
 
 	glTranslatef(center[0], center[1], center[2]);
-	glutSolidSphere(1.8 * radius, slice, stack);
+	glutSolidSphere(R_RATIO * radius, slice, stack);
 
 	glPopMatrix();
 }
@@ -181,7 +181,7 @@ void PacMan::draw() const {
 	glMaterialfv(GL_FRONT, GL_SHININESS, shininessArray);
 
 	glTranslatef(center[0], center[1], center[2]);
-	glutSolidSphere(1.8 * radius, slice, stack); 
+	glutSolidSphere(R_RATIO * radius, slice, stack);
 
 	glPopMatrix();
 }

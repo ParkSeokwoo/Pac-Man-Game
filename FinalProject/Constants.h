@@ -12,7 +12,6 @@
 
 
 
-
 /* GAME constants */
 #define NUM_ROW 31
 #define NUM_COL 28
@@ -30,4 +29,5 @@
 
 //15¹ø ¼öÁ¤
 #define M_PI 3.141592f
+#define R_RATIO 1.6
 //

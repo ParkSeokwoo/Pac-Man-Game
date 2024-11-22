@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="CollisionDetector.cpp" />
     <ClCompile Include="CollisionHandler.cpp" />
+    <ClCompile Include="Ghostroom.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Map.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="CollisionDetector.h" />
     <ClInclude Include="CollisionHandler.h" />
     <ClInclude Include="Constants.h" />
+    <ClInclude Include="GhostRoom.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Material.h" />

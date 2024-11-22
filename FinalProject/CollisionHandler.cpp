@@ -20,7 +20,8 @@ void CollisionHandler::operator()(PacMan& pacman, Ghost& ghost) {
 	if (ghost.getState() != Ghost::GHOSTSTATE::EATEN) {
 	//
 		if (colDetector(pacman, ghost)) {
-			pacman.setLife(pacman.getLife() - 1);
+			if (ghost.getState() != Ghost::GHOSTSTATE::FRIGHTENEND)
+				pacman.setLife(pacman.getLife() - 1);
 			// cout << "LIFE: " << pacman.getLife() << '\n';
 			pacman.setCollided(true);
 		}
