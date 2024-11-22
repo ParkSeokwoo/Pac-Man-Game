@@ -1,6 +1,6 @@
 #include "Timer.h"
 
-Timer::Timer() : elapsedTime(0), state(Timer::STATE::READY) {}
+Timer::Timer() : elapsedTime(0), state(Timer::STATE::NON_WORKING) {}
 
 void Timer::update(int deltaTime) {
     elapsedTime += deltaTime;
@@ -36,8 +36,8 @@ void Timer::initialize(STATE s, int t) {
     elapsedTime = t;
 }
 
-
-GameTimer::GameTimer() : readyTime(1000), chaseTime(20000), scatterTime(7000), responseTime(3000), ReadyInitialized(false) {}
+// ready timer 2000¿Ã ¡¡æ∆
+GameTimer::GameTimer() : readyTime(500), chaseTime(20000), scatterTime(7000), responseTime(3000), gameoverTime(5000), ReadyInitialized(false) {}
 
 void GameTimer::setReadyInitialized(bool s) {
     ReadyInitialized = s;
@@ -53,6 +53,9 @@ int GameTimer::getscatterTime() const {
 }
 int GameTimer::getresponseTime() const {
     return responseTime;
+}
+int GameTimer::getgameoverTime() const {
+    return gameoverTime;
 }
 bool GameTimer::getReadyInitialized() const {
     return ReadyInitialized;

@@ -7,22 +7,23 @@
 #include "Sphere.h"
 #include "Map.h"
 #include "Timer.h"
+#include "Texture.h"
 
 #include "CollisionHandler.h"
 #include <GL/freeglut.h>
 #include <array>
+#include <stb_image.h>
 
 using namespace std;
 
 const int FPS = 60;
 int sTime = 0;
 int eTime = 0;
+int life_base = 1;
 
 Light light(BOUNDARY_X, BOUNDARY_Y, BOUNDARY_X / 2, GL_LIGHT0);
 
 PacMan pacman(BLOCK_SIZE / 2.0f, 20, 20, false);
-
-// git 연동 했스요
 Ghost blinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::BLINKY);
 Ghost pinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::PINKY);
 Ghost inky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::INKY);
@@ -33,7 +34,10 @@ Map map;
 CollisionHandler colHandler;
 Material pacmanMtl, blinkyMtl, pinkyMtl, inkyMtl, clydeMtl, eatenMtl, frightenedMtl;
 Ghost::GHOSTSTATE currState;
+Texture logo_texture, ready_texture, gameover_texture;
 
+enum GAME_STATE {INIT, PLAY, GAMEOVER};
+GAME_STATE gs = INIT;
 
 void initializeMaterial(Material& mtl, const std::array<float, 4>& emission, const std::array<float, 4>& ambient, const std::array<float, 4>& diffuse, const std::array<float, 4>& specular, float shininess) {
 	mtl.setEmission(emission[0], emission[1], emission[2], emission[3]);
@@ -103,19 +107,13 @@ void initialize() {
 		{ 0.0f, 0.0f, 1.0f, 1.0f }, 
 		shininess);
 
-    // PacMan Initialization
-    pacman.setIndexPosition(17, 13);
-    pacman.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-    pacman.setMTL(pacmanMtl);
-
-    // Ghosts Initialization
-    initializeGhost(blinky, 1, 26, blinkyMtl);
-    initializeGhost(pinky, 1, 1, pinkyMtl);
-    initializeGhost(inky, 29, 26, inkyMtl);
-    initializeGhost(clyde, 29, 1, clydeMtl);
-
     // Map Initialization
     map.createMap();
+
+	// Texture Initialization
+	logo_texture.initializeTexture("Pac-Man_Logo.png");
+	gameover_texture.initializeTexture("gameover.png");
+	ready_texture.initializeTexture("ready.png");
 }
 
 void updateDirectionOfPacMan() {
@@ -476,13 +474,15 @@ int th1 = blinkingIntreval;
 int th2 = 1000;
 int th3 = 1200;
 int th4 = blackshownTime;
+int th5 = 1000;
+int th6 = 1200;
 
 int responseTime = gameTimer.getresponseTime();
 int GTelapsedTime, FTelapsedTime, BTelapsedTime;
 
 void resetGame() {
 	pacman.setCollided(false);
-	pacman.setIndexPosition(17, 13);
+	pacman.setIndexPosition(23, 13);
 	pacman.setCurrentDirection(Sphere::NONE);
 	pacman.setNextDirection(Sphere::NONE);
 	pacman.setVelocity(0.0f, 0.0f, 0.0f);
@@ -506,6 +506,9 @@ void resetGame() {
 	th2 = 1000;
 	th3 = 1200;
 	th4 = blackshownTime;
+	th5 = 1000;
+	th6 = 1200;
+
 
 	initializeGhost(blinky, 1, 26, blinkyMtl);
 	initializeGhost(pinky, 1, 1, pinkyMtl);
@@ -523,36 +526,155 @@ void idle() {
 		int deltaTime = eTime - sTime;
 		sTime = eTime;
 
-		//-------------------------------(gameTimer)-------------------------------
-		gameTimer.update(deltaTime);
+		if (gs == INIT) {
 
-		// READY: 처음시작과 RESPONSE 이후 실행
-		if (gameTimer.getState() == Timer::STATE::READY) {
-			bool isplay = gameTimer.checkchange(Timer::SCATTER, gameTimer.getreadyTime());
-			if (!gameTimer.getReadyInitialized()) {
-				gameTimer.setReadyInitialized(true);
-				resetGame();
-			}
-			return;
 		}
-		// RESPONSE: 부딪힌 채로 일정 시간 지나면 READY로
-		else if (gameTimer.getState() == Timer::STATE::RESPONSE) {
-			bool isready = gameTimer.checkchange(Timer::READY, gameTimer.getresponseTime());
-			// SMOOTH하게 돌아가기
-			GTelapsedTime = gameTimer.getelapsedTime();
-			if (th2 < GTelapsedTime && GTelapsedTime < th3) {
-				for (auto* g : ghosts) {
-					g->setAlpha(0.0f);
+		else if (gs == PLAY) {
+			//-------------------------------(gameTimer)-------------------------------
+			gameTimer.update(deltaTime);
+
+			// READY: 처음시작과 RESPONSE 이후 실행
+			if (gameTimer.getState() == Timer::STATE::READY) {
+				bool isplay = gameTimer.checkchange(Timer::SCATTER, gameTimer.getreadyTime());
+				if (!gameTimer.getReadyInitialized()) {
+					gameTimer.setReadyInitialized(true);
+					resetGame();
 				}
-			}
-			else if (GTelapsedTime > th3) {
-				pacman.setAlpha(1.0f - 1.5 * (float)((GTelapsedTime - th3) * (GTelapsedTime - th3)) / (float)((responseTime - th3) * (responseTime - th3)));
-			}
-			if (isready) {
-				gameTimer.setReadyInitialized(false);
-				blackshownTimer.initialize(Timer::STATE::READY, 0);
 				return;
 			}
+			// RESPONSE: 부딪힌 채로 일정 시간 지나면 READY로
+			else if (gameTimer.getState() == Timer::STATE::RESPONSE) {
+				bool isready = gameTimer.checkchange(Timer::READY, gameTimer.getresponseTime());
+				// SMOOTH하게 돌아가기
+				GTelapsedTime = gameTimer.getelapsedTime();
+				if (th2 < GTelapsedTime && GTelapsedTime < th3) {
+					for (auto* g : ghosts) {
+						g->setAlpha(0.0f);
+					}
+				}
+				else if (GTelapsedTime > th3) {
+					pacman.setAlpha(1.0f - 1.5 * (float)((GTelapsedTime - th3) * (GTelapsedTime - th3)) / (float)((responseTime - th3) * (responseTime - th3)));
+				}
+				if (isready) {
+					gameTimer.setReadyInitialized(false);
+					blackshownTimer.initialize(Timer::STATE::READY, 0);
+					return;
+				}
+				// ----------------------------(blackshownTimer)----------------------------
+				blackshownTimer.update(deltaTime);
+				BTelapsedTime = blackshownTimer.getelapsedTime();
+				if (BTelapsedTime > th4) {
+					th4 += blackshownTime;
+					bool isBlackShown = blackshownTimer.getState() == Timer::STATE::BLACKSHOWN;
+					blackshownTimer.setState(isBlackShown ? Timer::STATE::NON_WORKING : Timer::STATE::BLACKSHOWN);
+					float r = isBlackShown ? 1.0f : 0.0f; float g = isBlackShown ? 0.8f : 0.0f;	float b = isBlackShown ? 0.6f : 0.0f;
+					map.setBox_color(3, 1, r, g, b);
+					map.setBox_color(3, 26, r, g, b);
+					map.setBox_color(23, 1, r, g, b);
+					map.setBox_color(23, 26, r, g, b);
+				}
+				// ----------------------------(blackshownTimer)----------------------------
+				glutPostRedisplay();
+				return;
+			}
+			// GAMEOVER
+			else if (gameTimer.getState() == Timer::STATE::GAMEOVER) {
+				// SMOOTH하게 돌아가기
+				GTelapsedTime = gameTimer.getelapsedTime();
+				if (th5 < GTelapsedTime && GTelapsedTime < th6) {
+					for (auto* g : ghosts) {
+						g->setAlpha(0.0f);
+					}
+				}
+				else if (GTelapsedTime > th6) {
+					pacman.setAlpha(1.0f - 1.5 * (float)((GTelapsedTime - th6) * (GTelapsedTime - th6)) / (float)((responseTime - th6) * (responseTime - th6)));
+				}
+				bool isover = gameTimer.checkchange(Timer::NON_WORKING, gameTimer.getgameoverTime());
+
+				if (isover) {
+					gs = GAMEOVER;
+					map.setState(Map::MAP_STATE::INIT);
+					map.createMap();
+					return;
+				}
+				glutPostRedisplay();
+				return;
+			}
+			// PLAYING
+			// 상태 변경 check (Scatter <-> Chase)
+			else if (gameTimer.getState() == Timer::STATE::CHASE) {
+				// CHASE에서 SCATTER로 넘어갔는가?
+				if (gameTimer.checkchange(Timer::SCATTER, gameTimer.getchaseTime())) {
+					currState = Ghost::GHOSTSTATE::SCATTER;
+					// 고스트 상태 변경(START) (Scatter -> Chase)
+					for (auto* ghost : ghosts) {
+						if (ghost->getState() == Ghost::GHOSTSTATE::CHASE)
+							ghost->setState(currState);
+					}
+				}
+				else
+					currState = Ghost::GHOSTSTATE::CHASE;
+
+				if (frightenedTimer.getState() != Timer::STATE::NON_WORKING)
+					frightenedTimer.update(deltaTime);
+			}
+			else if (gameTimer.getState() == Timer::STATE::SCATTER) {
+				// SCATTER에서 CHASE로 넘어갔는가?
+				if (gameTimer.checkchange(Timer::CHASE, gameTimer.getscatterTime())) {
+					currState = Ghost::GHOSTSTATE::CHASE;
+					// 고스트 상태 변경(START) (Scatter <- Chase)
+					for (auto* ghost : ghosts) {
+						if (ghost->getState() == Ghost::GHOSTSTATE::SCATTER)
+							ghost->setState(currState);
+					}
+				}
+				else
+					currState = Ghost::GHOSTSTATE::SCATTER;
+
+				if (frightenedTimer.getState() != Timer::STATE::NON_WORKING)
+					frightenedTimer.update(deltaTime);
+			}
+
+			// -------------------------------(gameTimer)-------------------------------
+
+			// ----------------------------(frightenedTimer)----------------------------
+			switch (frightenedTimer.getState()) {
+			case Timer::STATE::NON_WORKING:
+				break;
+			case Timer::STATE::FRIGHTENED:
+				if (frightenedTimer.checkchange(Timer::TRANSITION, frightenedTimer.getfrightenedTime())) {}
+				break;
+			case Timer::STATE::TRANSITION:
+				if (frightenedTimer.checkchange(Timer::NON_WORKING, frightenedTimer.gettransitionTime())) {
+					// 고스트 상태 변경(START) (Frightened -> currState)
+					for (auto* ghost : ghosts) {
+						if (ghost->getState() == Ghost::GHOSTSTATE::FRIGHTENEND) {
+							ghost->setState(currState);
+							ghost->setAlpha(1.0f);
+						}
+						blinky.setMTL(blinkyMtl);
+						pinky.setMTL(pinkyMtl);
+						inky.setMTL(inkyMtl);
+						clyde.setMTL(clydeMtl);
+					}
+				}
+				else {
+					FTelapsedTime = frightenedTimer.getelapsedTime();
+					if (FTelapsedTime > th1) {
+						th1 += blinkingIntreval;
+						for (auto* ghost : ghosts) {
+							if (ghost->getState() == Ghost::GHOSTSTATE::FRIGHTENEND) {
+								ghost->setAlpha(ghost->getAlpha() == 1.0f ? 0.4f : 1.0f);
+							}
+						}
+					}
+				}
+				break;
+			default:
+				break;
+			}
+			// ----------------------------(frightenedTimer)----------------------------
+
 			// ----------------------------(blackshownTimer)----------------------------
 			blackshownTimer.update(deltaTime);
 			BTelapsedTime = blackshownTimer.getelapsedTime();
@@ -567,148 +689,60 @@ void idle() {
 				map.setBox_color(23, 26, r, g, b);
 			}
 			// ----------------------------(blackshownTimer)----------------------------
-			glutPostRedisplay();
-			return;
-		}
-		// PLAYING
-		// 상태 변경 check (Scatter <-> Chase)
-		else if (gameTimer.getState() == Timer::STATE::CHASE) {
-			// CHASE에서 SCATTER로 넘어갔는가?
-			if (gameTimer.checkchange(Timer::SCATTER, gameTimer.getchaseTime())) {
-				currState = Ghost::GHOSTSTATE::SCATTER;
-				// 고스트 상태 변경(START) (Scatter -> Chase)
+
+			// 큰 dot 먹었을 때(START) - chase와 scatter인 ghost만 모두 frightenend
+			int targetx = pacman.getXIndex();
+			int targety = pacman.getYIndex();
+			if (map.getPoint_type(targetx, targety) == Block::POINT_TYPE::BIG) {
+				frightenedTimer.initialize(Timer::STATE::FRIGHTENED, 0);
+				th1 = blinkingIntreval;
 				for (auto* ghost : ghosts) {
-					if (ghost->getState() == Ghost::GHOSTSTATE::CHASE)
-						ghost->setState(currState);
-				}
-			}
-			else
-				currState = Ghost::GHOSTSTATE::CHASE;
-
-			if (frightenedTimer.getState() != Timer::STATE::NON_WORKING)
-				frightenedTimer.update(deltaTime);
-		}
-		else if (gameTimer.getState() == Timer::STATE::SCATTER) {
-			// SCATTER에서 CHASE로 넘어갔는가?
-			if (gameTimer.checkchange(Timer::CHASE, gameTimer.getscatterTime())) {
-				currState = Ghost::GHOSTSTATE::CHASE;
-				// 고스트 상태 변경(START) (Scatter <- Chase)
-				for (auto* ghost : ghosts) {
-					if (ghost->getState() == Ghost::GHOSTSTATE::SCATTER)
-						ghost->setState(currState);
-				}
-			}
-			else
-				currState = Ghost::GHOSTSTATE::SCATTER;
-
-			if (frightenedTimer.getState() != Timer::STATE::NON_WORKING)
-				frightenedTimer.update(deltaTime);
-		}
-
-		// -------------------------------(gameTimer)-------------------------------
-
-		// ----------------------------(frightenedTimer)----------------------------
-		switch (frightenedTimer.getState()) {
-		case Timer::STATE::NON_WORKING:
-			break;
-		case Timer::STATE::FRIGHTENED:
-			if (frightenedTimer.checkchange(Timer::TRANSITION, frightenedTimer.getfrightenedTime())) {}
-			break;
-		case Timer::STATE::TRANSITION:
-			if (frightenedTimer.checkchange(Timer::NON_WORKING, frightenedTimer.gettransitionTime())) {
-				// 고스트 상태 변경(START) (Frightened -> currState)
-				for (auto* ghost : ghosts) {
-					if (ghost->getState() == Ghost::GHOSTSTATE::FRIGHTENEND) {
-						ghost->setState(currState);
-						ghost->setAlpha(1.0f);
-					}	
-					blinky.setMTL(blinkyMtl);
-					pinky.setMTL(pinkyMtl);
-					inky.setMTL(inkyMtl);
-					clyde.setMTL(clydeMtl);
-				}
-			}
-			else {
-				FTelapsedTime = frightenedTimer.getelapsedTime();
-				if (FTelapsedTime > th1) {
-					th1 += blinkingIntreval;
-					for (auto* ghost : ghosts) {
-						if (ghost->getState() == Ghost::GHOSTSTATE::FRIGHTENEND) {
-							ghost->setAlpha(ghost->getAlpha() == 1.0f ? 0.4f : 1.0f);
-						}
+					if (ghost->getState() == Ghost::GHOSTSTATE::CHASE || ghost->getState() == Ghost::GHOSTSTATE::SCATTER) {
+						ghost->setMTL(frightenedMtl);
+						ghost->setState(Ghost::GHOSTSTATE::FRIGHTENEND);
+						ghost->setChange_state(true);
 					}
 				}
 			}
-			break;
-		default:
-			break;
-		}
-		// ----------------------------(frightenedTimer)----------------------------
-		
-		// ----------------------------(blackshownTimer)----------------------------
-		blackshownTimer.update(deltaTime);
-		BTelapsedTime = blackshownTimer.getelapsedTime();
-		if (BTelapsedTime > th4) {
-			th4 += blackshownTime;
-			bool isBlackShown = blackshownTimer.getState() == Timer::STATE::BLACKSHOWN;
-			blackshownTimer.setState(isBlackShown ? Timer::STATE::NON_WORKING : Timer::STATE::BLACKSHOWN);
-			float r = isBlackShown ? 1.0f : 0.0f; float g = isBlackShown ? 0.8f : 0.0f;	float b = isBlackShown ? 0.6f : 0.0f;
-			map.setBox_color(3, 1, r, g, b);
-			map.setBox_color(3, 26, r, g, b);
-			map.setBox_color(23, 1, r, g, b);
-			map.setBox_color(23, 26, r, g, b);
-		}
-		// ----------------------------(blackshownTimer)----------------------------
+			map.setPoint_type(targetx, targety, Block::POINT_TYPE::NOPT);
+			// 큰 dot 먹었을 때(END)
 
-		// 큰 dot 먹었을 때(START) - chase와 scatter인 ghost만 모두 frightenend
-		int targetx = pacman.getXIndex();
-		int targety = pacman.getYIndex();
-		if (map.getPoint_type(targetx, targety) == Block::POINT_TYPE::BIG) {
-			frightenedTimer.initialize(Timer::STATE::FRIGHTENED, 0);
-			th1 = blinkingIntreval;
+
+			updatePacMan();
+			updateGhost();
+
+
+			// 충돌 검사(START) - 한번에 여러명 충돌할 우연의 우연의 우연의... 까지 고려하려면 for문 써야할 듯
 			for (auto* ghost : ghosts) {
-				if (ghost->getState() == Ghost::GHOSTSTATE::CHASE || ghost->getState() == Ghost::GHOSTSTATE::SCATTER) {
-					ghost->setMTL(frightenedMtl);
-					ghost->setState(Ghost::GHOSTSTATE::FRIGHTENEND);
+				colHandler(pacman, *ghost);
+				if (!pacman.getCollided()) {
+					continue;
+				}
+				pacman.setCollided(false); // 충돌 초기화
+				switch (ghost->getState()) {
+				case Ghost::GHOSTSTATE::SCATTER:
+				case Ghost::GHOSTSTATE::CHASE:
+					// RESPONSE 상태로 진입
+					gameTimer.initialize(Timer::STATE::RESPONSE, 0);
+					break;
+
+				case Ghost::GHOSTSTATE::FRIGHTENEND:
+					// ghost를 EATEN 상태로 변경
+					ghost->setState(Ghost::GHOSTSTATE::EATEN);
 					ghost->setChange_state(true);
+					ghost->setMTL(eatenMtl);
+					ghost->setAlpha(1.0f);
+					break;
+
+				default:
+					break;
 				}
 			}
-		}
-		map.setPoint_type(targetx, targety, Block::POINT_TYPE::NOPT);
-		// 큰 dot 먹었을 때(END)
-
-
-		updatePacMan();
-		updateGhost();
-
-
-		// 충돌 검사(START) - 한번에 여러명 충돌할 우연의 우연의 우연의... 까지 고려하려면 for문 써야할 듯
-		for (auto* ghost : ghosts) {
-			colHandler(pacman, *ghost);
-			if (!pacman.getCollided()) {
-				continue;
-			}
-			pacman.setCollided(false); // 충돌 초기화
-			switch (ghost->getState()) {
-			case Ghost::GHOSTSTATE::SCATTER:
-			case Ghost::GHOSTSTATE::CHASE:
-				// RESPONSE 상태로 진입
-				gameTimer.initialize(Timer::STATE::RESPONSE, 0);
-				break;
-
-			case Ghost::GHOSTSTATE::FRIGHTENEND:
-				// ghost를 EATEN 상태로 변경
-				ghost->setState(Ghost::GHOSTSTATE::EATEN);
-				ghost->setChange_state(true);
-				ghost->setMTL(eatenMtl);
-				ghost->setAlpha(1.0f);
-				break;
-
-			default:
-				break;
+			//충돌검사(END);
+			if (pacman.getLife() == 0) {
+				gameTimer.initialize(Timer::STATE::GAMEOVER, 0);
 			}
 		}
-		//충돌검사(END);
 
 		glutPostRedisplay();
 	}
@@ -720,6 +754,55 @@ void idle() {
 //	for (int i = 0; i < str.size(); i++)
 //		glutBitmapCharacter(font, str[i]);
 //}
+
+void keyboardDown(unsigned char key, int x, int y) {
+	if (tolower(key) == ' ' && gs == INIT) {
+		gs = PLAY;
+		map.setState(Map::MAP_STATE::ST1);
+		map.createMap();
+		// PacMan Initialization
+		pacman.setIndexPosition(23, 13);
+		pacman.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+		pacman.setMTL(pacmanMtl);
+		pacman.setLife(life_base);
+
+		// Ghosts Initialization
+		initializeGhost(blinky, 1, 26, blinkyMtl);
+		initializeGhost(pinky, 1, 1, pinkyMtl);
+		initializeGhost(inky, 29, 26, inkyMtl);
+		initializeGhost(clyde, 29, 1, clydeMtl);
+
+		//Timer Initialization
+		gameTimer.initialize(Timer::STATE::READY, 0);
+		frightenedTimer.initialize(Timer::STATE::READY, 0);
+		blackshownTimer.initialize(Timer::STATE::READY, 0);
+		gameTimer.setReadyInitialized(false);
+	}
+	else if (tolower(key) == 'r' && gs == GAMEOVER) {
+		gs = INIT;
+		map.setState(Map::MAP_STATE::INIT);
+		map.createMap();
+	}
+	else if (key == 27) { // ESC
+		exit(0);
+	}
+}
+
+void drawTexture(const Texture& texture, float x, float y, float width, float r) {
+	float height = width * r;
+	glEnable(GL_TEXTURE_2D);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 0.0f); glVertex2f(x - width / 2, y - height /2);
+	glTexCoord2f(0.0f, 1.0f); glVertex2f(x - width / 2, y + height / 2);     
+	glTexCoord2f(1.0f, 1.0f); glVertex2f(x + width / 2, y + height / 2); 
+	glTexCoord2f(1.0f, 0.0f); glVertex2f(x + width / 2, y - height / 2);    
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+}
 
 void display() {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -733,6 +816,11 @@ void display() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+	// Draw texture
+	if (gs == INIT) {
+		drawTexture(logo_texture, 0, +BOUNDARY_Y / 1.5, BOUNDARY_X * 1.8, logo_texture.getAspectRatio());
+	}
+	
 	// Draw 2D
 	map.draw();
 
@@ -746,12 +834,20 @@ void display() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// Draw pacman 
-	pacman.draw();
-	// Draw ghosts
-	for (auto* ghost : ghosts) {
-		if(ghost->getAlpha()>0)
-		ghost->draw();
+	if (gs == PLAY) {
+		// Draw pacman 
+		pacman.draw();
+		// Draw ghosts
+		for (auto* ghost : ghosts) {
+			if (ghost->getAlpha() > 0)
+				ghost->draw();
+		}
+		if (gameTimer.getState() == Timer::STATE::READY) {
+			drawTexture(ready_texture, -2, -20, 45, ready_texture.getAspectRatio());
+		}
+		else if (gameTimer.getState() == Timer::STATE::GAMEOVER && gameTimer.getelapsedTime() >= responseTime) {
+			drawTexture(gameover_texture, -5, -20, 50, gameover_texture.getAspectRatio());
+		}
 	}
 
 	glDisable(GL_BLEND);
@@ -795,6 +891,7 @@ int main(int argc, char** argv) {
 	// register callbacks
 	glutDisplayFunc(display);
 	glutIdleFunc(idle);
+	glutKeyboardFunc(keyboardDown);
 	glutSpecialFunc(specialKeyDown);
 
 	// enter GLUT event processing cycle

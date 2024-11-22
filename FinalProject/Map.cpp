@@ -200,39 +200,74 @@ void Block::draw() const {
 
 Map::Map() {
 	blocks = {};
+	state = MAP_STATE::INIT;
 }
 // 4번 수정 
 void Map::createMap() {
-	std::ifstream file("boxtype.txt");
-	while (file) {
-		int x, y, t;
-		float r;
-		file >> x >> y >> r >> t;
-		blocks[x][y].setPassable(false);
-		blocks[x][y].setRotate(r);
-		blocks[x][y].setBoxType(static_cast<Block::BOX_TYPE>(t));
-		blocks[x][y].setPoint(Block::POINT_TYPE::NOPT);
-	}
-
-	blocks[14][0].setPassable(true);
-	blocks[14][27].setPassable(true);
-	blocks[14][0].setPoint(Block::POINT_TYPE::SMALL);
-	blocks[14][27].setPoint(Block::POINT_TYPE::SMALL);
-
-	blocks[3][1].setPoint(Block::POINT_TYPE::BIG);
-	blocks[3][26].setPoint(Block::POINT_TYPE::BIG);
-	blocks[23][1].setPoint(Block::POINT_TYPE::BIG);
-	blocks[23][26].setPoint(Block::POINT_TYPE::BIG);
-
-	file.close();
-	float x = LEFT_BOUNDARY;
-	float y = TOP_BOUNDARY;
-	for (int i = 0; i < blocks.size(); i++) {
-		for (int j = 0; j < blocks[i].size(); j++) {
-			blocks[i][j].setCenter(x + j * BLOCK_SIZE, y - i * BLOCK_SIZE, 0.0f);
-			blocks[i][j].setWidth(BLOCK_SIZE);
-			blocks[i][j].setHeight(BLOCK_SIZE);
+	if (state == MAP_STATE::INIT) {
+		resetBlocks(false);
+		std::ifstream file("initial_boxtype.txt");
+		while (file) {
+			int x, y;
+			file >> x >> y;
+			blocks[x][y].setPassable(false);
 		}
+	}
+	else if (state == MAP_STATE::ST1) {
+		resetBlocks(true);
+		std::ifstream file("boxtype.txt");
+		while (file) {
+			int x, y, t;
+			float r;
+			file >> x >> y >> r >> t;
+			blocks[x][y].setPassable(false);
+			blocks[x][y].setRotate(r);
+			blocks[x][y].setBoxType(static_cast<Block::BOX_TYPE>(t));
+			blocks[x][y].setPoint(Block::POINT_TYPE::NOPT);
+		}
+
+		blocks[14][0].setPassable(true);
+		blocks[14][27].setPassable(true);
+		int xNopt[] = { 
+			14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
+			11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
+			17, 17, 17, 17, 17, 17, 17, 17, 17, 17,
+			9, 10, 9, 10,
+			12, 13, 15, 16, 18, 19,
+			12, 13, 15, 16, 18, 19,
+		};
+		int yNopt[] = {
+			1, 2, 3, 4, 5, 7, 8, 9, 18, 19, 20, 22, 23, 24, 25, 26,
+			9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+			9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+			12, 12, 15, 15,
+			9, 9, 9, 9, 9, 9, 
+			18, 18, 18, 18, 18, 18
+		
+		};
+		for (int x : xNopt) {
+			for (int y : yNopt) {
+				blocks[x][y].setPoint(Block::POINT_TYPE::NOPT);
+			}
+		}
+		blocks[3][1].setPoint(Block::POINT_TYPE::BIG);
+		blocks[3][26].setPoint(Block::POINT_TYPE::BIG);
+		blocks[23][1].setPoint(Block::POINT_TYPE::BIG);
+		blocks[23][26].setPoint(Block::POINT_TYPE::BIG);
+
+		file.close();
+		float x = LEFT_BOUNDARY;
+		float y = TOP_BOUNDARY;
+		for (int i = 0; i < blocks.size(); i++) {
+			for (int j = 0; j < blocks[i].size(); j++) {
+				blocks[i][j].setCenter(x + j * BLOCK_SIZE, y - i * BLOCK_SIZE, 0.0f);
+				blocks[i][j].setWidth(BLOCK_SIZE);
+				blocks[i][j].setHeight(BLOCK_SIZE);
+			}
+		}
+	}
+	else if (state == MAP_STATE::GAMEOVER) {
+
 	}
 }
 //
@@ -259,4 +294,23 @@ Block::POINT_TYPE Map::getPoint_type(int x, int y) {
 void Map::setBox_color(int x, int y, float r, float g, float b) {
 	blocks[x][y].setColor(r, g, b);
 }
+
+Map::MAP_STATE Map::getState() const {
+	return state;
+}
+void Map::setState(Map::MAP_STATE s) {
+	state = s;
+}
+void Map::resetBlocks(bool bpt) {
+	// 모든 Block 객체를 기본값으로 초기화
+	for (auto& row : blocks) {
+		for (auto& block : row) {
+			block = Block(); // Block의 기본 생성자 호출
+			if (!bpt) {
+				block.setPoint(Block::POINT_TYPE::NOPT);
+			}
+		}
+	}
+}
+
 //

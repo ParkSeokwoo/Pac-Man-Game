@@ -7,8 +7,8 @@
 #define WINDOW_W 640		// window's width
 #define WINDOW_H 640		// window's height
 
-#define BOUNDARY_X (WINDOW_W)/3
-#define BOUNDARY_Y (WINDOW_H)/3
+#define BOUNDARY_X (WINDOW_W)/3.3
+#define BOUNDARY_Y (WINDOW_H)/3.3
 
 
 

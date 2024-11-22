@@ -153,7 +153,7 @@ void Sphere::draw() const {
 
 //10번 수정
 PacMan::PacMan(float r, int sl, int st, bool bCol)
-	: Sphere(r, sl, st), bCollided(bCol) {}
+	: Sphere(r, sl, st), bCollided(bCol), life(1) {}
 //
 
 void PacMan::setCollided(bool bCol) {
@@ -184,6 +184,13 @@ void PacMan::draw() const {
 	glutSolidSphere(1.8 * radius, slice, stack); 
 
 	glPopMatrix();
+}
+
+void PacMan::setLife(int a) {
+	life = a;
+}
+int PacMan::getLife() {
+	return life;
 }
 
 //11번 수정

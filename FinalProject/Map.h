@@ -49,6 +49,7 @@ class Map
 {
 public:
 	Map();
+	enum MAP_STATE {INIT, ST1, ST2, GAMEOVER};
 
 	void createMap();
 
@@ -59,7 +60,11 @@ public:
 	void setPoint_type(int x, int y, Block::POINT_TYPE pt);
 	Block::POINT_TYPE getPoint_type(int x, int y);
 	void setBox_color(int x, int y, float r, float g, float b);
+	MAP_STATE getState() const;
+	void setState(MAP_STATE s);
+	void resetBlocks(bool bpt); // 추가: blocks를 기본값으로 초기화
 	//
 private:
 	std::array<std::array<Block, NUM_COL>, NUM_ROW>  blocks;
+	MAP_STATE state;
 };

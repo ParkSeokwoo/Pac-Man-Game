@@ -2,7 +2,12 @@
 class Timer {
 public:
     Timer();
-    enum STATE { READY, CHASE, SCATTER, RESPONSE, FRIGHTENED, TRANSITION, NON_WORKING, BLACKSHOWN};
+    enum STATE { 
+        NON_WORKING, 
+        READY, CHASE, SCATTER, RESPONSE, GAMEOVER,
+        FRIGHTENED, TRANSITION,
+        BLACKSHOWN
+    };
     void update(int deltaTime);
     void setState(STATE s);
     bool checkchange(STATE a, int t);
@@ -27,6 +32,7 @@ public:
     int getchaseTime() const;
     int getscatterTime() const;
     int getresponseTime() const;
+    int getgameoverTime() const;
     bool getReadyInitialized() const;
 
 
@@ -35,6 +41,7 @@ private:
     int chaseTime;
     int scatterTime;
     int responseTime;
+    int gameoverTime;
     bool ReadyInitialized;
 };
 

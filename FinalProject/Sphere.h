@@ -57,11 +57,14 @@ public:
 
 	void setCollided(bool bCol);
 	bool getCollided();
+	void setLife(int a);
+	int getLife();
 
 	virtual void draw() const;
 
 private:
 	bool bCollided;
+	int life;
 };
 
 /* Ghost class */
