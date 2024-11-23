@@ -28,6 +28,4 @@ C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(475,
 C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(475,37): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(874,63): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
 C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(874,44): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
-  Texture.cpp
-  코드를 생성하고 있습니다...
   FinalProject.vcxproj -> C:\Users\james\source\repos\FinalProject\Pac-Man-game\x64\Debug\FinalProject.exe
