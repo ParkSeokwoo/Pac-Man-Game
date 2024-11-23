@@ -1,2 +1,31 @@
-﻿  CollisionHandler.cpp
+﻿  Ghostroom.cpp
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Ghostroom.cpp(197,32): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Ghostroom.cpp(203,29): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Ghostroom.cpp(222,29): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Ghostroom.cpp(243,26): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Ghostroom.cpp(247,32): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Ghostroom.cpp(253,29): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Ghostroom.cpp(272,29): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Ghostroom.cpp(293,27): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Ghostroom.cpp(297,32): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Ghostroom.cpp(303,29): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Ghostroom.cpp(322,29): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+  Main.cpp
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\include\FreeImage.h(1,1): warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  (소스 파일 'Main.cpp'을(를) 컴파일하는 중)
+  
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(25,48): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(25,25): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(25,13): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(241,22): warning C4244: '초기화 중': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(257,22): warning C4244: '초기화 중': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(377,42): warning C4244: '인수': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(408,41): warning C4244: '인수': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(445,40): warning C4244: '인수': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(472,41): warning C4244: '인수': 'double'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(597,27): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(631,27): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(872,62): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(872,44): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+  코드를 생성하고 있습니다...
   FinalProject.vcxproj -> C:\Users\james\source\repos\FinalProject\Pac-Man-game\x64\Debug\FinalProject.exe

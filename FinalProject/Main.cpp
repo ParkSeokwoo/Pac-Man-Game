@@ -8,6 +8,7 @@
 #include "Map.h"
 #include "Timer.h"
 #include "Texture.h"
+#include "GhostRoom.h"
 
 #include "CollisionHandler.h"
 #include <GL/freeglut.h>
@@ -19,7 +20,7 @@ using namespace std;
 const int FPS = 60;
 int sTime = 0;
 int eTime = 0;
-int life_base = 1;
+int life_base = 2;
 
 Light light(BOUNDARY_X, BOUNDARY_Y, BOUNDARY_X / 2, GL_LIGHT0);
 
@@ -31,6 +32,7 @@ Ghost clyde(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::CLYDE);
 vector<Ghost *> ghosts = { &blinky, &pinky, &inky, &clyde };
 
 Map map;
+GhostRoom ghostroom;
 CollisionHandler colHandler;
 Material pacmanMtl, blinkyMtl, pinkyMtl, inkyMtl, clydeMtl, eatenMtl, frightenedMtl;
 Ghost::GHOSTSTATE currState;
@@ -183,6 +185,11 @@ void updateDirectionOfPacMan() {
 
 void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY, bool shortest = true) {
 	int idx[2] = { ghost.getXIndex(), ghost.getYIndex() };
+/*	if (ghost.getGhostname() == Ghost::INKY) {
+		cout << idx[0] << idx[1] << targetX << targetY << '\n';
+	}
+	*/
+
 	int lIdx[2] = { idx[0], idx[1] - 1 };// left
 	int tIdx[2] = { idx[0] - 1, idx[1] };// top
 	int rIdx[2] = { idx[0], idx[1] + 1 };// right
@@ -228,11 +235,14 @@ void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY, bool shortes
 	}
 	// scatter나 chase, eaten의 경우 shortest가 true -> 최소방향 찾기
 	if (shortest) {
-		int minIdxDist = INT_MAX;
+		float minIdxDist = (float)INT_MAX;
 		for (int i = 0; i < 4; i++) {
 			if (directions[i] != reverseDir && nextblocks[i].isPassable()) {
-				int dist_squre = (indices[i][0] - targetX) * (indices[i][0] - targetX) + (indices[i][1] - targetY) * (indices[i][1] - targetY);
+				float dist_squre = (indices[i][0] - targetX) * (indices[i][0] - targetX) + (indices[i][1] - targetY) * (indices[i][1] - targetY);
 				if (dist_squre < minIdxDist) {
+					if (ghost.getGhostname() == Ghost::INKY) {
+						// cout << indices[i][1] << indices[i][1] << "Possible" << '\n';
+					}
 					minIdxDist = dist_squre;
 					newDir = directions[i];
 				}
@@ -241,10 +251,10 @@ void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY, bool shortes
 	}
 	// frightened이 경우 shortest가 false -> 최대방향 찾기
 	else {
-		int maxIdxDist = 0;
+		float maxIdxDist = 0;
 		for (int i = 0; i < 4; i++) {
 			if (directions[i] != reverseDir && nextblocks[i].isPassable()) {
-				int dist_squre = (indices[i][0] - targetX) * (indices[i][0] - targetX) + (indices[i][1] - targetY) * (indices[i][1] - targetY);
+				float dist_squre = (indices[i][0] - targetX) * (indices[i][0] - targetX) + (indices[i][1] - targetY) * (indices[i][1] - targetY);
 				if (dist_squre > maxIdxDist) {
 					maxIdxDist = dist_squre;
 					newDir = directions[i];
@@ -252,9 +262,14 @@ void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY, bool shortes
 			}
 		}
 	}
-	
+
 	ghost.setNextDirection(newDir);
 	ghost.updateDirection();
+
+	//if (ghost.getGhostname() == Ghost::INKY) {
+	//	cout << idx[0] << idx[1] << inky.getCurrentDirection() << newDir  << '\n';
+	//}
+
 	// 현재 상태에 맞게 속도 조절 -> frightened 느리고, eaten 빠르게
 	if (ghost.getState() == Ghost::GHOSTSTATE::CHASE || ghost.getState() == Ghost::GHOSTSTATE::SCATTER) {
 		switch (ghost.getCurrentDirection()) {
@@ -333,135 +348,159 @@ void updateGhost() {
 	// 각 ghost 마다 STATE 별로 direction update 후 move
 	int targetx = pacman.getXIndex(), targety = pacman.getYIndex();
 
-	//blinky
-	bool bIdxPosUpdated = blinky.isIndexPositionUpdated();
-	if (bIdxPosUpdated) {
-		switch (blinky.getState()) {
-		case Ghost::GHOSTSTATE::CHASE:
-			updateDirectionOfGhost(blinky, targetx, targety);
-			break;
-		case Ghost::GHOSTSTATE::SCATTER:
-			updateDirectionOfGhost(blinky, 0, 27);
-			break;
-		// EATEN의 경우 목표 위치 도달시 currState로 바꿔줌
-		case Ghost::GHOSTSTATE::EATEN: 
-			if (blinky.getXIndex() == 1 && blinky.getYIndex() == 26) {
-				blinky.setMTL(blinkyMtl);
-				blinky.setState(currState);
-				blinky.setChange_state(true);
+	for (auto* ghost : ghosts) {
+		if (ghost->getState() == Ghost::GHOSTROOM) {
+			if (ghost->getisInGhostroom() == false) {
+				ghostroom.moveGhostToRoom(*ghost, currState);
 			}
-			updateDirectionOfGhost(blinky, 0, 27);
-			break;
-		case Ghost::GHOSTSTATE::FRIGHTENEND:
-			updateDirectionOfGhost(blinky, targetx, targety, false);
-			break;
-		default:
-			break;
+			else if (ghost->getisInGhostroom() == true && (ghost->getVelocity()[0] != 0.0f || ghost->getVelocity()[1] != 0.0f)){
+				ghostroom.moveGhostToMap(*ghost, currState);
+			}
 		}
-	}
-	blinky.move();
+		else {
+			switch (ghost->getGhostname()) {
+			case Ghost::BLINKY: {
+				//blinky
+				bool bIdxPosUpdated = blinky.isIndexPositionUpdated();
+				if (bIdxPosUpdated) {
+					switch (blinky.getState()) {
+					case Ghost::GHOSTSTATE::CHASE:
+						updateDirectionOfGhost(blinky, targetx, targety);
+						break;
+					case Ghost::GHOSTSTATE::SCATTER:
+						updateDirectionOfGhost(blinky, 0, 27);
+						break;
+					case Ghost::GHOSTSTATE::EATEN:
+						if (blinky.getXIndex() == 11 && (blinky.getYIndex() == 13 || blinky.getYIndex() == 14)) {
+							blinky.setState(Ghost::GHOSTROOM);
+						}
+						updateDirectionOfGhost(blinky, 11, 13.5);
+						break;
+					case Ghost::GHOSTSTATE::FRIGHTENEND:
+						updateDirectionOfGhost(blinky, targetx, targety, false);
+						break;
+					default:
+						break;
+					}
+				}
+			} break;
+			case Ghost::PINKY: {
+				// pinky
+				bool pIdxPosUpdated = pinky.isIndexPositionUpdated();
+				if (pIdxPosUpdated) {
+					switch (pinky.getState()) {
+					case Ghost::GHOSTSTATE::CHASE:
+						switch (pacman.getCurrentDirection()) {
+						case Sphere::UP: updateDirectionOfGhost(pinky, targetx - 4, targety); break;
+						case Sphere::RIGHT: updateDirectionOfGhost(pinky, targetx, targety + 4); break;
+						case Sphere::DOWN: updateDirectionOfGhost(pinky, targetx + 4, targety); break;
+						case Sphere::LEFT: updateDirectionOfGhost(pinky, targetx, targety - 4); break;
+						default: updateDirectionOfGhost(pinky, targetx, targety); break;
+						}
+						break;
+					case Ghost::GHOSTSTATE::SCATTER:
+						updateDirectionOfGhost(pinky, 0, 0);
+						break;
+					case Ghost::GHOSTSTATE::EATEN:
+						if (pinky.getXIndex() == 11 && (pinky.getYIndex() == 13 || pinky.getYIndex() == 14)) {
+							pinky.setState(Ghost::GHOSTROOM);
+						}
+						updateDirectionOfGhost(pinky, 11, 13.5);
+						break;
+					case Ghost::GHOSTSTATE::FRIGHTENEND:
+						updateDirectionOfGhost(pinky, targetx, targety, false);
+						break;
+					default:
+						break;
+					}
+				}
+			} break;
+			case Ghost::INKY: {
+				// inky
+				bool iIdxPosUpdated = inky.isIndexPositionUpdated();
+				int inkytargetx = targetx, inkytargety = targety;
+				if (iIdxPosUpdated) {
+					switch (inky.getState()) {
+					case Ghost::GHOSTSTATE::CHASE:
 
-	// pinky
-	bool pIdxPosUpdated = pinky.isIndexPositionUpdated();
-	if (pIdxPosUpdated) {
-		switch (pinky.getState()) {
-		case Ghost::GHOSTSTATE::CHASE:
-			switch (pacman.getCurrentDirection()) {
-			case Sphere::UP: updateDirectionOfGhost(pinky, targetx - 4, targety); break;
-			case Sphere::RIGHT: updateDirectionOfGhost(pinky, targetx, targety + 4); break;
-			case Sphere::DOWN: updateDirectionOfGhost(pinky, targetx + 4, targety); break;
-			case Sphere::LEFT: updateDirectionOfGhost(pinky, targetx, targety - 4); break;
-			default: updateDirectionOfGhost(pinky, targetx, targety); break;
-			}
-			break;
-		case Ghost::GHOSTSTATE::SCATTER:
-			updateDirectionOfGhost(pinky, 0, 0);
-			break;
-		// EATEN의 경우 목표 위치 도달시 currState로 바꿔줌
-		case Ghost::GHOSTSTATE::EATEN:
-			if (pinky.getXIndex() == 1 && pinky.getYIndex() == 1) {
-				pinky.setMTL(pinkyMtl);
-				pinky.setState(currState);
-				pinky.setChange_state(true);
-			}
-			updateDirectionOfGhost(pinky, 0, 0);
-			break;
-		case Ghost::GHOSTSTATE::FRIGHTENEND:
-			updateDirectionOfGhost(pinky, targetx, targety, false); 
-			break;
-		default:
-			break;
-		}
-	}
-	pinky.move();
+						// cout << inky.getState() << inky.getCurrentDirection() << '\n';
+						switch (pacman.getCurrentDirection()) {
+						case Sphere::UP: inkytargetx -= 2; break;
+						case Sphere::RIGHT: inkytargety += 2; break;
+						case Sphere::DOWN: inkytargetx += 2; break;
+						case Sphere::LEFT: inkytargety -= 2; break;
+						default: break;
+						}
+						updateDirectionOfGhost(inky, 2 * inkytargetx - blinky.getXIndex(), 2 * inkytargety - blinky.getYIndex());
 
-	// inky
-	bool iIdxPosUpdated = inky.isIndexPositionUpdated();
-	int inkytargetx = targetx, inkytargety = targety;
-	if (iIdxPosUpdated) {
-		switch (inky.getState()) {
-		case Ghost::GHOSTSTATE::CHASE:
-			switch (pacman.getCurrentDirection()) {
-			case Sphere::UP: inkytargetx -= 2; break;
-			case Sphere::RIGHT: inkytargety += 2; break;
-			case Sphere::DOWN: inkytargetx += 2; break;
-			case Sphere::LEFT: inkytargety -= 2; break;
-			default: break;
-			}
-			targetx = 2 * inkytargetx - blinky.getXIndex();
-			targety = 2 * inkytargety - blinky.getYIndex();
-			updateDirectionOfGhost(inky, targetx, targety);
-			break;
-		case Ghost::GHOSTSTATE::SCATTER:
-			updateDirectionOfGhost(inky, 30, 27);
-			break;
-		// EATEN의 경우 목표 위치 도달시 currState로 바꿔줌
-		case Ghost::GHOSTSTATE::EATEN:
-			if (inky.getXIndex() == 29 && inky.getYIndex() == 26) {
-				inky.setMTL(inkyMtl);
-				inky.setState(currState);
-				inky.setChange_state(true);
-			}
-			updateDirectionOfGhost(inky, 30, 27);
-			break;
-		case Ghost::GHOSTSTATE::FRIGHTENEND:
-			updateDirectionOfGhost(inky, targetx, targety, false);
-			break;
-		default:
-			break;
-		}
-	}
-	inky.move();
+						// cout << inky.getCurrentDirection() << ' ' << inky.getVelocity()[0] << ' ' << inky.getVelocity()[1] << '\n';
+						break;
+					case Ghost::GHOSTSTATE::SCATTER:
+						updateDirectionOfGhost(inky, 30, 27);
+						break;
+					case Ghost::GHOSTSTATE::EATEN:
+						if (inky.getXIndex() == 11 && (inky.getYIndex() == 13 || inky.getYIndex() == 14)) {
+							inky.setState(Ghost::GHOSTROOM);
+						}
+						updateDirectionOfGhost(inky, 11, 13.5);
+						break;
+						break;
+					case Ghost::GHOSTSTATE::FRIGHTENEND:
+						updateDirectionOfGhost(inky, targetx, targety, false);
+						break;
+					default:
+						break;
+					}
+				}
+			} break;
+			case Ghost::CLYDE: {
+				bool cIdxPosUpdated = clyde.isIndexPositionUpdated();
+				if (cIdxPosUpdated) {
+					int distance = abs(clyde.getXIndex() - targetx) + abs(clyde.getYIndex() - targety);
+					switch (clyde.getState()) {
+					case Ghost::GHOSTSTATE::CHASE:
+						if (distance > 8) updateDirectionOfGhost(clyde, 30, 0);
+						else updateDirectionOfGhost(clyde, targetx, targety);
+						break;
+					case Ghost::GHOSTSTATE::SCATTER:
+						updateDirectionOfGhost(clyde, 30, 0);
+						break;
+					case Ghost::GHOSTSTATE::EATEN:
+						if (clyde.getXIndex() == 11 && (clyde.getYIndex() == 13 || clyde.getYIndex() == 14)) {
+							clyde.setState(Ghost::GHOSTROOM);
+						}
+						updateDirectionOfGhost(clyde, 14, 13.5);
+						break;
+					case Ghost::GHOSTSTATE::FRIGHTENEND:
+						updateDirectionOfGhost(clyde, targetx, targety, false);
+						break;
+					default:
+						break;
+					}
+				}
 
-	// clyde
-	bool cIdxPosUpdated = clyde.isIndexPositionUpdated();
-	if (cIdxPosUpdated) {
-		int distance = abs(clyde.getXIndex() - targetx) + abs(clyde.getYIndex() - targety);
-		switch (clyde.getState()) {
-		case Ghost::GHOSTSTATE::CHASE:
-			if (distance > 8) updateDirectionOfGhost(clyde, 30, 0);
-			else updateDirectionOfGhost(clyde, targetx, targety);
-			break;
-		case Ghost::GHOSTSTATE::SCATTER:
-			updateDirectionOfGhost(clyde, 30, 0);
-			break;
-		// EATEN의 경우 목표 위치 도달시 currState로 바꿔줌.
-		case Ghost::GHOSTSTATE::EATEN:
-			if (clyde.getXIndex() == 29 && clyde.getYIndex() == 1) {
-				clyde.setMTL(clydeMtl);
-				clyde.setState(currState);
-				clyde.setChange_state(true);
+			} break;
+			default:
+				break;
 			}
-			updateDirectionOfGhost(clyde, 30, 0);
-			break;
-		case Ghost::GHOSTSTATE::FRIGHTENEND:
-			updateDirectionOfGhost(clyde, targetx, targety, false);
-			break;
-		default:
-			break;
+			ghost->move();
 		}
+			
 	}
-	clyde.move();
+
+
+}
+
+void updateGhostRoom(int dt) {
+	ghostroom.updatetime(dt);
+	int i = ghostroom.checktime();
+	if (i >= 0) cout << i << '\n';
+	if (i == 1)
+		ghostroom.getGhost(i)->setVelocity(+0.6f * MOVE_SPEED, 0.0f, 0.0f);
+	else if (i == 2)
+		ghostroom.getGhost(i)->setVelocity(-0.6f * MOVE_SPEED, 0.0f, 0.0f);
+	else if (i == 0)
+		ghostroom.getGhost(i)->setVelocity(0.0f, +0.6f * MOVE_SPEED, 0.0f);
 }
 
 GameTimer gameTimer;
@@ -514,6 +553,7 @@ void resetGame() {
 	initializeGhost(pinky, 1, 1, pinkyMtl);
 	initializeGhost(inky, 29, 26, inkyMtl);
 	initializeGhost(clyde, 29, 1, clydeMtl);
+	ghostroom.initialize();
 	glutPostRedisplay();
 }
 
@@ -531,8 +571,9 @@ void idle() {
 		}
 		else if (gs == PLAY) {
 			//-------------------------------(gameTimer)-------------------------------
-			gameTimer.update(deltaTime);
-
+			if (frightenedTimer.getState() == Timer::STATE::NON_WORKING)
+				gameTimer.update(deltaTime);
+			// cout << currState << '\n';
 			// READY: 처음시작과 RESPONSE 이후 실행
 			if (gameTimer.getState() == Timer::STATE::READY) {
 				bool isplay = gameTimer.checkchange(Timer::SCATTER, gameTimer.getreadyTime());
@@ -622,6 +663,7 @@ void idle() {
 				// SCATTER에서 CHASE로 넘어갔는가?
 				if (gameTimer.checkchange(Timer::CHASE, gameTimer.getscatterTime())) {
 					currState = Ghost::GHOSTSTATE::CHASE;
+					cout << "변경 후: " << currState << '\n';
 					// 고스트 상태 변경(START) (Scatter <- Chase)
 					for (auto* ghost : ghosts) {
 						if (ghost->getState() == Ghost::GHOSTSTATE::SCATTER)
@@ -651,11 +693,13 @@ void idle() {
 						if (ghost->getState() == Ghost::GHOSTSTATE::FRIGHTENEND) {
 							ghost->setState(currState);
 							ghost->setAlpha(1.0f);
+							switch (ghost->getGhostname()) {
+							case Ghost::BLINKY: blinky.setMTL(blinkyMtl); break;
+							case Ghost::PINKY: pinky.setMTL(pinkyMtl); break;
+							case Ghost::INKY: inky.setMTL(inkyMtl); break;
+							case Ghost::CLYDE: clyde.setMTL(clydeMtl); break;
+							}
 						}
-						blinky.setMTL(blinkyMtl);
-						pinky.setMTL(pinkyMtl);
-						inky.setMTL(inkyMtl);
-						clyde.setMTL(clydeMtl);
 					}
 				}
 				else {
@@ -710,6 +754,7 @@ void idle() {
 
 			updatePacMan();
 			updateGhost();
+			updateGhostRoom(deltaTime);
 
 
 			// 충돌 검사(START) - 한번에 여러명 충돌할 우연의 우연의 우연의... 까지 고려하려면 for문 써야할 듯
@@ -719,29 +764,35 @@ void idle() {
 					continue;
 				}
 				pacman.setCollided(false); // 충돌 초기화
+				cout << ghost->getState();
 				switch (ghost->getState()) {
 				case Ghost::GHOSTSTATE::SCATTER:
-				case Ghost::GHOSTSTATE::CHASE:
+				case Ghost::GHOSTSTATE::CHASE: {
 					// RESPONSE 상태로 진입
-					gameTimer.initialize(Timer::STATE::RESPONSE, 0);
+					if (pacman.getLife() == 0) {
+						gameTimer.initialize(Timer::STATE::GAMEOVER, 0);
+						// cout << "진입1" << '\n';
+					}
+					else {
+						gameTimer.initialize(Timer::STATE::RESPONSE, 0);
+						// cout << "진입2" << '\n';
+					}
 					break;
-
-				case Ghost::GHOSTSTATE::FRIGHTENEND:
+				}
+				case Ghost::GHOSTSTATE::FRIGHTENEND: {
 					// ghost를 EATEN 상태로 변경
 					ghost->setState(Ghost::GHOSTSTATE::EATEN);
 					ghost->setChange_state(true);
 					ghost->setMTL(eatenMtl);
 					ghost->setAlpha(1.0f);
+				}
 					break;
-
 				default:
 					break;
 				}
 			}
 			//충돌검사(END);
-			if (pacman.getLife() == 0) {
-				gameTimer.initialize(Timer::STATE::GAMEOVER, 0);
-			}
+			
 		}
 
 		glutPostRedisplay();
@@ -774,8 +825,8 @@ void keyboardDown(unsigned char key, int x, int y) {
 
 		//Timer Initialization
 		gameTimer.initialize(Timer::STATE::READY, 0);
-		frightenedTimer.initialize(Timer::STATE::READY, 0);
-		blackshownTimer.initialize(Timer::STATE::READY, 0);
+		frightenedTimer.initialize(Timer::STATE::NON_WORKING, 0);
+		blackshownTimer.initialize(Timer::STATE::NON_WORKING, 0);
 		gameTimer.setReadyInitialized(false);
 	}
 	else if (tolower(key) == 'r' && gs == GAMEOVER) {

@@ -194,8 +194,10 @@ int PacMan::getLife() {
 }
 
 //11번 수정
+Ghost::Ghost(): name(Ghost::NONE){}
+
 Ghost::Ghost(float r, int sl, int st, Ghost::GHOSTSTATE s, Ghost::GHOSTNAME n)
-	: Sphere(r, sl, st), state(s), name(n), isChange_state(false) {}
+	: Sphere(r, sl, st), state(s), name(n), isChange_state(false), isInGhostroom(false) {}
 //
 
 void Ghost::setState(Ghost::GHOSTSTATE s) {
@@ -205,6 +207,10 @@ void Ghost::setState(Ghost::GHOSTSTATE s) {
 //12번 수정
 void Ghost::setChange_state(bool v) {
 	isChange_state = v;
+}
+
+void Ghost::setisInGhostroom(bool v) {
+	isInGhostroom = v;
 }
 //
 
@@ -219,5 +225,9 @@ Ghost::GHOSTNAME Ghost::getGhostname() const {
 //13번 수정
 bool Ghost::getChange_state() const{
 	return isChange_state;
+}
+
+bool Ghost::getisInGhostroom() const {
+	return isInGhostroom;
 }
 //

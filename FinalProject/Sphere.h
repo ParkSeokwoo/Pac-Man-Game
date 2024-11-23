@@ -71,22 +71,25 @@ private:
 class Ghost : public Sphere
 {
 public:
-	enum GHOSTSTATE { CHASE, SCATTER, EATEN, FRIGHTENEND };
-	enum GHOSTNAME { BLINKY, PINKY, INKY, CLYDE };
-
+	enum GHOSTSTATE { CHASE, SCATTER, EATEN, FRIGHTENEND, GHOSTROOM };
+	enum GHOSTNAME { NONE, BLINKY, PINKY, INKY, CLYDE };
+	Ghost();
 	Ghost(float r, int sl, int st, GHOSTSTATE s, GHOSTNAME n);
 
 	// 22¹ø ¼öÁ¤
 	void setState(GHOSTSTATE s);
 	void setChange_state(bool v);
+	void setisInGhostroom(bool v);
 
 	GHOSTSTATE getState() const;
 	GHOSTNAME getGhostname() const;
 	bool getChange_state() const;
+	bool getisInGhostroom() const;
 	//
 
 private:
 	GHOSTSTATE state;
 	GHOSTNAME name;
 	bool isChange_state;
+	bool isInGhostroom;
 };
