@@ -745,6 +745,9 @@ void idle() {
 						ghost->setState(Ghost::GHOSTSTATE::FRIGHTENEND);
 						ghost->setChange_state(true);
 					}
+					else if (ghost->getState() == Ghost::GHOSTSTATE::FRIGHTENEND) {
+						ghost->setAlpha(1.0f);
+					}
 				}
 			}
 			map.setPoint_type(targetx, targety, Block::POINT_TYPE::NOPT);

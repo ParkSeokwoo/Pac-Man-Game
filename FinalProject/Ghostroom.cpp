@@ -239,7 +239,7 @@ void GhostRoom::moveGhostToMap(Ghost& ghost, Ghost::GHOSTSTATE currState) {
 		}
 	}
 	else if (i == 1) {
-		if (ghost.getCenter()[0] < LEFT_BOUNDARY + 13.5 * BLOCK_SIZE) {
+		if (ghost.getCenter()[0] < LEFT_BOUNDARY + 13.5 * BLOCK_SIZE && ghost.getCenter()[1] < TOP_BOUNDARY - 11 * BLOCK_SIZE) {
 			ghost.setVelocity(0.6f * MOVE_SPEED, 0.0f, 0.0f);
 			ghost.setCenter(ghost.getCenter() + ghost.getVelocity());
 		}
@@ -289,7 +289,7 @@ void GhostRoom::moveGhostToMap(Ghost& ghost, Ghost::GHOSTSTATE currState) {
 		}
 	}
 	else if (i == 2) {
-		if (ghost.getCenter()[0] > LEFT_BOUNDARY + 13.5 * BLOCK_SIZE) {
+		if (ghost.getCenter()[0] > LEFT_BOUNDARY + 13.5 * BLOCK_SIZE && ghost.getCenter()[1] < TOP_BOUNDARY - 11 * BLOCK_SIZE)  {
 			ghost.setVelocity(-0.6f * MOVE_SPEED, 0.0f, 0.0f);
 			ghost.setCenter(ghost.getCenter() + ghost.getVelocity());
 		}
@@ -385,13 +385,6 @@ int GhostRoom::checktime() {
 }
 
 void GhostRoom::initialize() {
-	for (auto& ghost : in_ghosts) {
-		if (ghost != nullptr) {
-			delete ghost; 
-			ghost = nullptr; 
-		}
-	}
-
 	for (auto& ghost : in_ghosts) {
 		ghost = new Ghost(); 
 	}
