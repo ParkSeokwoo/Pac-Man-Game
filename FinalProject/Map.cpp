@@ -3,6 +3,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <algorithm>
+using namespace std;
+
 // 2¹ø ¼öÁ¤
 Block::Block() {
 	width = 0.0f;
@@ -11,7 +14,8 @@ Block::Block() {
 	rotate = 0.0f;
 	type = BOX_TYPE::NONE;
 	bPoint = POINT_TYPE::SMALL;
-	box_color = Vector3f(1.0f, 0.8f, 0.6f);
+	box_color = Vector3f(0.0f, 0.0f, 1.0f);
+	object_color = Vector3f(1.0f, 0.8f, 0.6f);
 }
 Block::Block(float x, float y, float z, float w, float h) {
 	Shape3D::setCenter(x, y, z);
@@ -21,7 +25,8 @@ Block::Block(float x, float y, float z, float w, float h) {
 	rotate = 0.0f;
 	type = BOX_TYPE::NONE;
 	bPoint = POINT_TYPE::SMALL;
-	box_color = Vector3f(1.0f, 0.8f, 0.6f);
+	box_color = Vector3f(0.0f, 0.0f, 1.0f);
+	object_color = Vector3f(1.0f, 0.8f, 0.6f);
 }
 //
 void Block::setWidth(float w) {
@@ -43,8 +48,11 @@ void Block::setBoxType(BOX_TYPE bt) {
 void Block::setPoint(POINT_TYPE pt) {
 	bPoint = pt;
 }
-void Block::setColor(float r, float g, float b) {
+void Block::setBoxColor(float r, float g, float b) {
 	box_color[0] = r; box_color[1] = g; box_color[2] = b;
+}
+void Block::setObjectColor(float r, float g, float b) {
+	object_color[0] = r; object_color[1] = g; object_color[2] = b;
 }
 //
 
@@ -57,6 +65,12 @@ float Block::getHeight() const {
 }
 bool Block::isPassable() const {
 	return bPassable;
+}
+Vector3f Block::getBoxColor() const {
+	return box_color;
+}
+Vector3f Block::getObjectColor() const {
+	return object_color;
 }
 Block::POINT_TYPE Block::getPoint_type() const {
 	return bPoint;
@@ -79,7 +93,7 @@ void Block::draw() const {
 
 		glTranslatef(center[0], center[1], center[2]);
 		glRotatef(rotate, 0.0f, 0.0f, 1.0f);
-		glColor3f(0.0f, 0.0f, 1.0f);
+		glColor3f(box_color[0], box_color[1], box_color[2]);
 
 		switch (type) {
 		case BOX_TYPE::ST1: {
@@ -221,7 +235,7 @@ void Block::draw() const {
 		glPushMatrix();
 
 		glTranslatef(center[0], center[1], center[2]);
-		glColor3f(box_color[0], box_color[1], box_color[2]);
+		glColor3f(object_color[0], object_color[1], object_color[2]);
 
 		glBegin(GL_TRIANGLE_FAN);
 		for (int i = 0; i <= numSegments; ++i) {
@@ -334,8 +348,11 @@ Block::POINT_TYPE Map::getPoint_type(int x, int y) {
 	return blocks[x][y].getPoint_type();
 }
 
+void Map::setObject_color(int x, int y, float r, float g, float b) {
+	blocks[x][y].setObjectColor(r, g, b);
+}
 void Map::setBox_color(int x, int y, float r, float g, float b) {
-	blocks[x][y].setColor(r, g, b);
+	blocks[x][y].setBoxColor(r, g, b);
 }
 
 Map::MAP_STATE Map::getState() const {
@@ -354,6 +371,22 @@ void Map::resetBlocks(bool bpt) {
 			}
 		}
 	}
+}
+bool Map::isGameClear(int v) {
+	int count = 0;
+	for (const auto& row : blocks) {
+		count += std::count_if(row.begin(), row.end(), [](const Block& block) {
+			return block.getPoint_type() == Block::POINT_TYPE::SMALL;
+			});
+	}
+	// cout << count << '\n';
+	return count < v ? true : false;
+}
+Vector3f Map::getBox_Color(int x, int y) const {
+	return blocks[x][y].getBoxColor();
+}
+Vector3f Map::getObject_Color(int x, int y) const {
+	return blocks[x][y].getObjectColor();
 }
 
 //

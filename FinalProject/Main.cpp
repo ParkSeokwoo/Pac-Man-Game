@@ -21,6 +21,7 @@ const int FPS = 60;
 int sTime = 0;
 int eTime = 0;
 int life_base = 2;
+int clear_criteria = 230;
 
 Light light((float)BOUNDARY_X, (float)BOUNDARY_Y, (float)BOUNDARY_X / 2.0f, GL_LIGHT0);
 
@@ -38,7 +39,7 @@ Material pacmanMtl, blinkyMtl, pinkyMtl, inkyMtl, clydeMtl, eatenMtl, frightened
 Ghost::GHOSTSTATE currState;
 Texture logo_texture, ready_texture, gameover_texture;
 
-enum GAME_STATE {INIT, PLAY, GAMEOVER};
+enum GAME_STATE { INIT, PLAY, GAMEEND };
 GAME_STATE gs = INIT;
 
 void initializeMaterial(Material& mtl, const std::array<float, 4>& emission, const std::array<float, 4>& ambient, const std::array<float, 4>& diffuse, const std::array<float, 4>& specular, float shininess) {
@@ -514,6 +515,9 @@ int th3 = 1200;
 int th4 = blackshownTime;
 int th5 = 1000;
 int th6 = 1200;
+int th7 = 1000;
+int th8 = 1200;
+int th9 = 200;
 
 int responseTime = gameTimer.getresponseTime();
 int GTelapsedTime, FTelapsedTime, BTelapsedTime;
@@ -546,7 +550,9 @@ void resetGame() {
 	th4 = blackshownTime;
 	th5 = 1000;
 	th6 = 1200;
-
+	th7 = 1000;
+	th8 = 1200;
+	th9 = 200;
 
 	initializeGhost(blinky, 1, 26, blinkyMtl);
 	initializeGhost(pinky, 1, 1, pinkyMtl);
@@ -608,10 +614,10 @@ void idle() {
 					bool isBlackShown = blackshownTimer.getState() == Timer::STATE::BLACKSHOWN;
 					blackshownTimer.setState(isBlackShown ? Timer::STATE::NON_WORKING : Timer::STATE::BLACKSHOWN);
 					float r = isBlackShown ? 1.0f : 0.0f; float g = isBlackShown ? 0.8f : 0.0f;	float b = isBlackShown ? 0.6f : 0.0f;
-					map.setBox_color(3, 1, r, g, b);
-					map.setBox_color(3, 26, r, g, b);
-					map.setBox_color(23, 1, r, g, b);
-					map.setBox_color(23, 26, r, g, b);
+					map.setObject_color(3, 1, r, g, b);
+					map.setObject_color(3, 26, r, g, b);
+					map.setObject_color(23, 1, r, g, b);
+					map.setObject_color(23, 26, r, g, b);
 				}
 				// ----------------------------(blackshownTimer)----------------------------
 				glutPostRedisplay();
@@ -632,7 +638,41 @@ void idle() {
 				bool isover = gameTimer.checkchange(Timer::NON_WORKING, gameTimer.getgameoverTime());
 
 				if (isover) {
-					gs = GAMEOVER;
+					gs = GAMEEND;
+					map.setState(Map::MAP_STATE::INIT);
+					map.createMap();
+					return;
+				}
+				glutPostRedisplay();
+				return;
+			}
+			// GAMECLEAR
+			else if (gameTimer.getState() == Timer::STATE::GAMECLEAR) {
+				// SMOOTH하게 돌아가기
+				GTelapsedTime = gameTimer.getelapsedTime();
+				if (th7 < GTelapsedTime && GTelapsedTime < th8) {
+					for (auto* g : ghosts) {
+						g->setAlpha(0.0f);
+					}
+				}
+				else if (GTelapsedTime > th6) {
+					if (GTelapsedTime - th6 > th9) {
+						th9 += 200;
+						float r = (map.getBox_Color(0, 0)[0] == 0.0f) ? 1.0f : 0.0f; float g = (map.getBox_Color(0, 0)[0] == 0.0f) ? 1.0f : 0.0f;	float b = (map.getBox_Color(0, 0)[0] == 0.0f) ? 1.0f : 1.0f;
+						for (int i = 0; i < NUM_ROW; ++i) { 
+							for (int j = 0; j < NUM_COL; ++j) {
+								map.setPoint_type(i, j, Block::POINT_TYPE::NOPT);
+								if (map.getBlock(i, j).isPassable() == false) {
+									map.setBox_color(i, j, r, g, b);
+								}
+							}
+						}
+					}
+				}
+				bool isend = gameTimer.checkchange(Timer::NON_WORKING, gameTimer.getgameclearTime());
+
+				if (isend) {
+					gs = GAMEEND;
 					map.setState(Map::MAP_STATE::INIT);
 					map.createMap();
 					return;
@@ -726,10 +766,10 @@ void idle() {
 				bool isBlackShown = blackshownTimer.getState() == Timer::STATE::BLACKSHOWN;
 				blackshownTimer.setState(isBlackShown ? Timer::STATE::NON_WORKING : Timer::STATE::BLACKSHOWN);
 				float r = isBlackShown ? 1.0f : 0.0f; float g = isBlackShown ? 0.8f : 0.0f;	float b = isBlackShown ? 0.6f : 0.0f;
-				map.setBox_color(3, 1, r, g, b);
-				map.setBox_color(3, 26, r, g, b);
-				map.setBox_color(23, 1, r, g, b);
-				map.setBox_color(23, 26, r, g, b);
+				map.setObject_color(3, 1, r, g, b);
+				map.setObject_color(3, 26, r, g, b);
+				map.setObject_color(23, 1, r, g, b);
+				map.setObject_color(23, 26, r, g, b);
 			}
 			// ----------------------------(blackshownTimer)----------------------------
 
@@ -794,7 +834,9 @@ void idle() {
 				}
 			}
 			//충돌검사(END);
-			
+			if (map.isGameClear(clear_criteria)) {
+				gameTimer.initialize(Timer::STATE::GAMECLEAR, 0);
+			}
 		}
 
 		glutPostRedisplay();
@@ -831,7 +873,7 @@ void keyboardDown(unsigned char key, int x, int y) {
 		blackshownTimer.initialize(Timer::STATE::NON_WORKING, 0);
 		gameTimer.setReadyInitialized(false);
 	}
-	else if (tolower(key) == 'r' && gs == GAMEOVER) {
+	else if (tolower(key) == 'r' && gs == GAMEEND) {
 		gs = INIT;
 		map.setState(Map::MAP_STATE::INIT);
 		map.createMap();

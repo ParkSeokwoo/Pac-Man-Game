@@ -37,7 +37,7 @@ void Timer::initialize(STATE s, int t) {
 }
 
 // ready timer 2000¿Ã ¡¡æ∆
-GameTimer::GameTimer() : readyTime(1500), chaseTime(20000), scatterTime(7000), responseTime(3000), gameoverTime(5000), ReadyInitialized(false) {}
+GameTimer::GameTimer() : readyTime(1500), chaseTime(20000), scatterTime(7000), responseTime(3000), gameoverTime(5000), gameclearTime(4000), ReadyInitialized(false) {}
 
 void GameTimer::setReadyInitialized(bool s) {
     ReadyInitialized = s;
@@ -56,6 +56,9 @@ int GameTimer::getresponseTime() const {
 }
 int GameTimer::getgameoverTime() const {
     return gameoverTime;
+}
+int GameTimer::getgameclearTime() const {
+    return gameclearTime;
 }
 bool GameTimer::getReadyInitialized() const {
     return ReadyInitialized;

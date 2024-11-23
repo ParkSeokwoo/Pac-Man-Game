@@ -4,7 +4,7 @@ public:
     Timer();
     enum STATE { 
         NON_WORKING, 
-        READY, CHASE, SCATTER, RESPONSE, GAMEOVER,
+        READY, CHASE, SCATTER, RESPONSE, GAMEOVER, GAMECLEAR, 
         FRIGHTENED, TRANSITION,
         BLACKSHOWN
     };
@@ -33,6 +33,7 @@ public:
     int getscatterTime() const;
     int getresponseTime() const;
     int getgameoverTime() const;
+    int getgameclearTime() const;
     bool getReadyInitialized() const;
 
 
@@ -42,6 +43,7 @@ private:
     int scatterTime;
     int responseTime;
     int gameoverTime;
+    int gameclearTime;
     bool ReadyInitialized;
 };
 
