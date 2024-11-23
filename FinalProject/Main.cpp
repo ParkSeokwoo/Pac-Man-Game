@@ -22,7 +22,7 @@ int sTime = 0;
 int eTime = 0;
 int life_base = 2;
 
-Light light(BOUNDARY_X, BOUNDARY_Y, BOUNDARY_X / 2, GL_LIGHT0);
+Light light((float)BOUNDARY_X, (float)BOUNDARY_Y, (float)BOUNDARY_X / 2.0f, GL_LIGHT0);
 
 PacMan pacman(BLOCK_SIZE / 2.0f, 20, 20, false);
 Ghost blinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::BLINKY);
@@ -183,7 +183,7 @@ void updateDirectionOfPacMan() {
 	}
 }
 
-void updateDirectionOfGhost(Ghost& ghost, int targetX, int targetY, bool shortest = true) {
+void updateDirectionOfGhost(Ghost& ghost, float targetX, float targetY, bool shortest = true) {
 	int idx[2] = { ghost.getXIndex(), ghost.getYIndex() };
 /*	if (ghost.getGhostname() == Ghost::INKY) {
 		cout << idx[0] << idx[1] << targetX << targetY << '\n';
@@ -374,7 +374,7 @@ void updateGhost() {
 						if (blinky.getXIndex() == 11 && (blinky.getYIndex() == 13 || blinky.getYIndex() == 14)) {
 							blinky.setState(Ghost::GHOSTROOM);
 						}
-						updateDirectionOfGhost(blinky, 11, 13.5);
+						updateDirectionOfGhost(blinky, 11, 13.5f);
 						break;
 					case Ghost::GHOSTSTATE::FRIGHTENEND:
 						updateDirectionOfGhost(blinky, targetx, targety, false);
@@ -405,7 +405,7 @@ void updateGhost() {
 						if (pinky.getXIndex() == 11 && (pinky.getYIndex() == 13 || pinky.getYIndex() == 14)) {
 							pinky.setState(Ghost::GHOSTROOM);
 						}
-						updateDirectionOfGhost(pinky, 11, 13.5);
+						updateDirectionOfGhost(pinky, 11, 13.5f);
 						break;
 					case Ghost::GHOSTSTATE::FRIGHTENEND:
 						updateDirectionOfGhost(pinky, targetx, targety, false);
@@ -442,7 +442,7 @@ void updateGhost() {
 						if (inky.getXIndex() == 11 && (inky.getYIndex() == 13 || inky.getYIndex() == 14)) {
 							inky.setState(Ghost::GHOSTROOM);
 						}
-						updateDirectionOfGhost(inky, 11, 13.5);
+						updateDirectionOfGhost(inky, 11, 13.5f);
 						break;
 						break;
 					case Ghost::GHOSTSTATE::FRIGHTENEND:
@@ -469,7 +469,7 @@ void updateGhost() {
 						if (clyde.getXIndex() == 11 && (clyde.getYIndex() == 13 || clyde.getYIndex() == 14)) {
 							clyde.setState(Ghost::GHOSTROOM);
 						}
-						updateDirectionOfGhost(clyde, 14, 13.5);
+						updateDirectionOfGhost(clyde, 14, 13.5f);
 						break;
 					case Ghost::GHOSTSTATE::FRIGHTENEND:
 						updateDirectionOfGhost(clyde, targetx, targety, false);
@@ -494,7 +494,6 @@ void updateGhost() {
 void updateGhostRoom(int dt) {
 	ghostroom.updatetime(dt);
 	int i = ghostroom.checktime();
-	if (i >= 0) cout << i << '\n';
 	if (i == 1)
 		ghostroom.getGhost(i)->setVelocity(+0.6f * MOVE_SPEED, 0.0f, 0.0f);
 	else if (i == 2)
@@ -594,7 +593,7 @@ void idle() {
 					}
 				}
 				else if (GTelapsedTime > th3) {
-					pacman.setAlpha(1.0f - 1.5 * (float)((GTelapsedTime - th3) * (GTelapsedTime - th3)) / (float)((responseTime - th3) * (responseTime - th3)));
+					pacman.setAlpha(1.0f - 1.5f * (float)((GTelapsedTime - th3) * (GTelapsedTime - th3)) / (float)((responseTime - th3) * (responseTime - th3)));
 				}
 				if (isready) {
 					gameTimer.setReadyInitialized(false);
@@ -628,7 +627,7 @@ void idle() {
 					}
 				}
 				else if (GTelapsedTime > th6) {
-					pacman.setAlpha(1.0f - 1.5 * (float)((GTelapsedTime - th6) * (GTelapsedTime - th6)) / (float)((responseTime - th6) * (responseTime - th6)));
+					pacman.setAlpha(1.0f - 1.5f * (float)((GTelapsedTime - th6) * (GTelapsedTime - th6)) / (float)((responseTime - th6) * (responseTime - th6)));
 				}
 				bool isover = gameTimer.checkchange(Timer::NON_WORKING, gameTimer.getgameoverTime());
 
@@ -663,7 +662,7 @@ void idle() {
 				// SCATTER에서 CHASE로 넘어갔는가?
 				if (gameTimer.checkchange(Timer::CHASE, gameTimer.getscatterTime())) {
 					currState = Ghost::GHOSTSTATE::CHASE;
-					cout << "변경 후: " << currState << '\n';
+					// cout << "변경 후: " << currState << '\n';
 					// 고스트 상태 변경(START) (Scatter <- Chase)
 					for (auto* ghost : ghosts) {
 						if (ghost->getState() == Ghost::GHOSTSTATE::SCATTER)
@@ -764,7 +763,7 @@ void idle() {
 					continue;
 				}
 				pacman.setCollided(false); // 충돌 초기화
-				cout << ghost->getState();
+				// cout << ghost->getState();
 				switch (ghost->getState()) {
 				case Ghost::GHOSTSTATE::SCATTER:
 				case Ghost::GHOSTSTATE::CHASE: {
@@ -869,7 +868,7 @@ void display() {
 
 	// Draw texture
 	if (gs == INIT) {
-		drawTexture(logo_texture, 0, +BOUNDARY_Y / 1.5, BOUNDARY_X * 1.8, logo_texture.getAspectRatio());
+		drawTexture(logo_texture, 0, +BOUNDARY_Y / 1.5f, BOUNDARY_X * 1.8f, logo_texture.getAspectRatio());
 	}
 	
 	// Draw 2D

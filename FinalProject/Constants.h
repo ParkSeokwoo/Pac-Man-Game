@@ -29,5 +29,5 @@
 
 //15¹ø ¼öÁ¤
 #define M_PI 3.141592f
-#define R_RATIO 1.6
+#define R_RATIO 1.6f
 //

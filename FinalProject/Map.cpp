@@ -214,7 +214,7 @@ void Block::draw() const {
 			numSegments = 20;
 		}			
 		else if (bPoint == POINT_TYPE::BIG) {
-			radius = width / 2.5;
+			radius = width / 2.5f;
 			numSegments = 50;
 		}
 	//

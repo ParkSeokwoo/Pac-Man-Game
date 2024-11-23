@@ -194,7 +194,7 @@ int PacMan::getLife() {
 }
 
 //11¹ø ¼öÁ¤
-Ghost::Ghost(): name(Ghost::NONE){}
+Ghost::Ghost(): state(Ghost::GHOSTSTATE::SCATTER), name(Ghost::GHOSTNAME::NONE), isChange_state(false), isInGhostroom(false) {}
 
 Ghost::Ghost(float r, int sl, int st, Ghost::GHOSTSTATE s, Ghost::GHOSTNAME n)
 	: Sphere(r, sl, st), state(s), name(n), isChange_state(false), isInGhostroom(false) {}
