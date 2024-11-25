@@ -268,6 +268,25 @@ void Map::createMap() {
 			blocks[x][y].setBoxType(static_cast<Block::BOX_TYPE>(t));
 			blocks[x][y].setPoint(Block::POINT_TYPE::NOPT);
 		}
+		int xNopt[] = {
+			9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+			9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 
+			21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
+			10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+		};
+		int yNopt[] = {
+			5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,            
+			5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 
+			5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+			22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22             
+		};
+
+		for (int i = 0; i < sizeof(xNopt) / sizeof(xNopt[0]); ++i) {
+			int x = xNopt[i];
+			int y = yNopt[i];
+			blocks[x][y].setPassable(true);
+		}
+
 		float x = LEFT_BOUNDARY;
 		float y = TOP_BOUNDARY;
 		for (int i = 0; i < blocks.size(); i++) {
@@ -311,10 +330,10 @@ void Map::createMap() {
 			18, 18, 18, 18, 18, 18
 		
 		};
-		for (int x : xNopt) {
-			for (int y : yNopt) {
-				blocks[x][y].setPoint(Block::POINT_TYPE::NOPT);
-			}
+		for (int i = 0; i < sizeof(xNopt) / sizeof(xNopt[0]); ++i) {
+			int x = xNopt[i];
+			int y = yNopt[i];
+			blocks[x][y].setPoint(Block::POINT_TYPE::NOPT);
 		}
 		blocks[3][1].setPoint(Block::POINT_TYPE::BIG);
 		blocks[3][26].setPoint(Block::POINT_TYPE::BIG);

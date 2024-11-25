@@ -75,6 +75,29 @@ void initializeGhost(Ghost& ghost, int x, int y, Material& mtl, int i = -1) {
 	}
 }
 
+void init_pacman_ghost() {
+	// PacMan Initialization
+	pacman.setIndexPosition(21, 5);
+	pacman.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+	pacman.setMTL(pacmanMtl);
+	pacman.setAlpha(1.0f);
+	pacman.setCurrentDirection(Sphere::NONE);
+	pacman.setNextDirection(Sphere::NONE);
+
+	// Ghosts Initialization
+	initializeGhost(blinky, 15, 5, blinkyMtl);
+	initializeGhost(pinky, 13, 5, pinkyMtl);
+	initializeGhost(inky, 11, 5, inkyMtl);
+	initializeGhost(clyde, 9, 5, clydeMtl);
+	for (auto* ghost : ghosts) {
+		ghost->setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+		ghost->setAlpha(1.0f);
+		ghost->setCurrentDirection(Sphere::NONE);
+		ghost->setNextDirection(Sphere::NONE);
+		ghost->setIndexPositionUpdated(true);
+	}
+}
+
 void initialize() {
     // Light Initialization
     light.setAmbient(0.5f, 0.5f, 0.5f, 1.0f);
@@ -142,19 +165,10 @@ void initialize() {
 	newhighscore_text_texture.initializeTexture("newhighscore_text.png");
 	restart_text_texture.initializeTexture("restart_text.png");
 
-	// PacMan Initialization
-	pacman.setIndexPosition(21, 5);
-	pacman.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-	pacman.setMTL(pacmanMtl);
-
-	// Ghosts Initialization
-	initializeGhost(blinky, 15, 5, blinkyMtl);
-	initializeGhost(pinky, 13, 5, pinkyMtl);
-	initializeGhost(inky, 11, 5, inkyMtl);
-	initializeGhost(clyde, 9, 5, clydeMtl);
+	init_pacman_ghost();
 }
 
-void updateDirectionOfPacMan() {
+void updateDirectionOfPacMan(int targetX = 0, int targetY = 0) {
 	int idx[2] = { pacman.getXIndex(), pacman.getYIndex() };
 
 	int lIdx[2] = { idx[0], idx[1] - 1 };// left
@@ -172,6 +186,64 @@ void updateDirectionOfPacMan() {
 	const Block& tBlock = map.getBlock(tIdx[0], tIdx[1]);// top
 	const Block& rBlock = map.getBlock(rIdx[0], rIdx[1]);// right
 	const Block& bBlock = map.getBlock(bIdx[0], bIdx[1]);// bottom
+
+	Block nextblocks[4] = { tBlock, lBlock, bBlock, rBlock };
+
+	int indices[4][2] = { { tIdx[0], tIdx[1] }, { lIdx[0], lIdx[1] }, { bIdx[0], bIdx[1] },	{ rIdx[0], rIdx[1] } };
+	Sphere::DIRECTION directions[4] = { Sphere::DIRECTION::UP, Sphere::DIRECTION::LEFT, Sphere::DIRECTION::DOWN, Sphere::DIRECTION::RIGHT };
+	Sphere::DIRECTION newDir = Sphere::DIRECTION::NONE;
+	Sphere::DIRECTION reverseDir = Sphere::DIRECTION::NONE;
+	switch (pacman.getCurrentDirection()) {
+	case Sphere::UP:
+		reverseDir = Sphere::DOWN;
+		break;
+	case Sphere::LEFT:
+		reverseDir = Sphere::RIGHT;
+		break;
+	case Sphere::DOWN:
+		reverseDir = Sphere::UP;
+		break;
+	case Sphere::RIGHT:
+		reverseDir = Sphere::LEFT;
+		break;
+	default:
+		reverseDir = Sphere::NONE;
+		break;
+		}
+	if (gs == INIT) {
+
+		float minIdxDist = (float)INT_MAX;
+		for (int i = 0; i < 4; i++) {
+			if (directions[i] != reverseDir && nextblocks[i].isPassable()) {
+				float dist_squre = (indices[i][0] - targetX) * (indices[i][0] - targetX) + (indices[i][1] - targetY) * (indices[i][1] - targetY);
+				if (dist_squre < minIdxDist) {
+					minIdxDist = dist_squre;
+					newDir = directions[i];
+				}
+			}
+		}
+		pacman.setNextDirection(newDir);
+		pacman.updateDirection();
+		switch (pacman.getCurrentDirection()) {
+		case Sphere::DIRECTION::LEFT: {
+			pacman.setVelocity(-MOVE_SPEED, 0.0f, 0.0f);
+			break;
+		}
+		case Sphere::DIRECTION::RIGHT: {
+			pacman.setVelocity(MOVE_SPEED, 0.0f, 0.0f);
+			break;
+		}
+		case Sphere::DIRECTION::DOWN: {
+			pacman.setVelocity(0.0f, -MOVE_SPEED, 0.0f);
+			break;
+		}
+		case Sphere::DIRECTION::UP: {
+			pacman.setVelocity(0.0f, MOVE_SPEED, 0.0f);
+			break;
+		}
+		}
+		return;
+	}
 
 	// update direction - passable하면 방향을 바꿔줌
 	Sphere::DIRECTION nextDir = pacman.getNextDirection();
@@ -272,9 +344,6 @@ void updateDirectionOfGhost(Ghost& ghost, float targetX, float targetY, bool sho
 			if (directions[i] != reverseDir && nextblocks[i].isPassable()) {
 				float dist_squre = (indices[i][0] - targetX) * (indices[i][0] - targetX) + (indices[i][1] - targetY) * (indices[i][1] - targetY);
 				if (dist_squre < minIdxDist) {
-					if (ghost.getGhostname() == Ghost::INKY) {
-						// cout << indices[i][1] << indices[i][1] << "Possible" << '\n';
-					}
 					minIdxDist = dist_squre;
 					newDir = directions[i];
 				}
@@ -366,6 +435,11 @@ void updatePacMan() {
 	bool bNoDir = pacman.getCurrentDirection() == Sphere::DIRECTION::NONE;
 	bool bIdxPosUpdated = pacman.isIndexPositionUpdated();
 	if (bNoDir || bIdxPosUpdated) {
+		if (gs == INIT) {
+			updateDirectionOfPacMan(14, 14);
+			pacman.move();
+			return;
+		}
 		updateDirectionOfPacMan();
 		colHandler(pacman, map);
 	}
@@ -375,6 +449,18 @@ void updatePacMan() {
 void updateGhost() {
 	// 각 ghost 마다 STATE 별로 direction update 후 move
 	int targetx = pacman.getXIndex(), targety = pacman.getYIndex();
+	if (gs == INIT) {
+		for (auto* ghost : ghosts) {
+			bool IdxPosUpdated = ghost->isIndexPositionUpdated();
+			// cout << 1 << '\n';
+			if (IdxPosUpdated) {
+				// cout << 2 << '\n';
+				updateDirectionOfGhost(*ghost, targetx, targety);
+			}
+			ghost->move();
+		}
+		return;
+	}
 
 	for (auto* ghost : ghosts) {
 		if (ghost->getState() == Ghost::GHOSTROOM) {
@@ -589,7 +675,6 @@ void resetGame() {
 	glutPostRedisplay();
 }
 
-
 void idle() {
 	float spf = 1000.0f / FPS;
 	eTime = glutGet(GLUT_ELAPSED_TIME);
@@ -601,6 +686,8 @@ void idle() {
 		if (gs == INIT) {
 			updatePacMan();
 			updateGhost();
+			glutPostRedisplay();
+			return;
 		}
 		else if (gs == PLAY) {
 			//-------------------------------(gameTimer)-------------------------------
@@ -928,7 +1015,7 @@ void display() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	if (gs == PLAY) {
+	if (gs == INIT || gs == PLAY) {
 		// Draw pacman 
 		pacman.draw();
 		// Draw ghosts
@@ -936,6 +1023,8 @@ void display() {
 			if (ghost->getAlpha() > 0)
 				ghost->draw();
 		}
+	}
+	if (gs == PLAY) {
 		if (gameTimer.getState() == Timer::STATE::READY) {
 			drawTexture(ready_text_texture, -2, -20, 45, ready_text_texture.getAspectRatio());
 		}
@@ -957,17 +1046,7 @@ void keyboardDown(unsigned char key, int x, int y) {
 		gs = PLAY;
 		map.setState(Map::MAP_STATE::ST1);
 		map.createMap();
-		// PacMan Initialization
-		pacman.setIndexPosition(23, 13);
-		pacman.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-		pacman.setMTL(pacmanMtl);
-		pacman.setLife(life_base);
-
-		// Ghosts Initialization
-		initializeGhost(blinky, 11, 13, blinkyMtl);
-		initializeGhost(pinky, 11, 13, pinkyMtl, 0);
-		initializeGhost(inky, 11, 13, inkyMtl, 1);
-		initializeGhost(clyde, 11, 13, clydeMtl, 2);
+		init_pacman_ghost();
 
 		//Timer Initialization
 		gameTimer.initialize(Timer::STATE::READY, 0);
@@ -979,6 +1058,7 @@ void keyboardDown(unsigned char key, int x, int y) {
 		gs = INIT;
 		map.setState(Map::MAP_STATE::INIT);
 		map.createMap();
+		init_pacman_ghost();
 	}
 	else if (key == 27) { // ESC
 		exit(0);
@@ -986,23 +1066,25 @@ void keyboardDown(unsigned char key, int x, int y) {
 }
 
 void specialKeyDown(int key, int x, int y) {
-	switch (key) {
-	case GLUT_KEY_LEFT:
-		pacman.setNextDirection(Sphere::DIRECTION::LEFT);
-		break;
-	case GLUT_KEY_UP:
-		pacman.setNextDirection(Sphere::DIRECTION::UP);
-		break;
-	case GLUT_KEY_RIGHT:
-		pacman.setNextDirection(Sphere::DIRECTION::RIGHT);
-		break;
-	case GLUT_KEY_DOWN:
-		pacman.setNextDirection(Sphere::DIRECTION::DOWN);
-		break;
-	default:
-		break;
+	if (gs == PLAY) {
+		switch (key) {
+		case GLUT_KEY_LEFT:
+			pacman.setNextDirection(Sphere::DIRECTION::LEFT);
+			break;
+		case GLUT_KEY_UP:
+			pacman.setNextDirection(Sphere::DIRECTION::UP);
+			break;
+		case GLUT_KEY_RIGHT:
+			pacman.setNextDirection(Sphere::DIRECTION::RIGHT);
+			break;
+		case GLUT_KEY_DOWN:
+			pacman.setNextDirection(Sphere::DIRECTION::DOWN);
+			break;
+		default:
+			break;
+		}
+		glutPostRedisplay();
 	}
-	glutPostRedisplay();
 }
 
 int main(int argc, char** argv) {
