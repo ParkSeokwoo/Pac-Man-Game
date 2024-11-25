@@ -21,6 +21,8 @@ public:
 	void settime(int i, int t);
 	// in_time 기준 넘는 index 중 max 큰거(지연 많이 된거) 반환
 	int checktime();
+	// i 위치에 ghost 넣기
+	void setGhostinIndex(Ghost& g, int i);
 
 	void initialize();
 

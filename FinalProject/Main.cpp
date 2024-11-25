@@ -21,7 +21,7 @@ const int FPS = 60;
 int sTime = 0;
 int eTime = 0;
 int life_base = 2;
-int clear_criteria = 230;
+int clear_criteria = 100; // 초기에 241개
 
 Light light((float)BOUNDARY_X, (float)BOUNDARY_Y, (float)BOUNDARY_X / 2.0f, GL_LIGHT0);
 
@@ -50,10 +50,29 @@ void initializeMaterial(Material& mtl, const std::array<float, 4>& emission, con
 	mtl.setShininess(shininess);
 }
 
-void initializeGhost(Ghost& ghost, int x, int y, Material& mtl) {
+void initializeGhost(Ghost& ghost, int x, int y, Material& mtl, int i = -1) {
     ghost.setIndexPosition(x, y);
     ghost.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
     ghost.setMTL(mtl);
+
+	if (i == 0) {
+		ghost.setState(Ghost::GHOSTROOM);
+		ghost.setCenter(LEFT_BOUNDARY + 13.5 * BLOCK_SIZE, TOP_BOUNDARY - 14 * BLOCK_SIZE, 0.0f);
+		ghost.setisInGhostroom(true);
+		ghostroom.setGhostinIndex(ghost, 0);
+	}
+	else if (i == 1) {
+		ghost.setState(Ghost::GHOSTROOM);
+		ghost.setCenter(LEFT_BOUNDARY + 11.5 * BLOCK_SIZE, TOP_BOUNDARY - 14 * BLOCK_SIZE, 0.0f);
+		ghost.setisInGhostroom(true);
+		ghostroom.setGhostinIndex(ghost, 1);
+	}
+	else if (i == 2) {
+		ghost.setState(Ghost::GHOSTROOM);
+		ghost.setCenter(LEFT_BOUNDARY + 15.5 * BLOCK_SIZE, TOP_BOUNDARY - 14 * BLOCK_SIZE, 0.0f);
+		ghost.setisInGhostroom(true);
+		ghostroom.setGhostinIndex(ghost, 2);
+	}
 }
 
 void initialize() {
@@ -186,10 +205,6 @@ void updateDirectionOfPacMan() {
 
 void updateDirectionOfGhost(Ghost& ghost, float targetX, float targetY, bool shortest = true) {
 	int idx[2] = { ghost.getXIndex(), ghost.getYIndex() };
-/*	if (ghost.getGhostname() == Ghost::INKY) {
-		cout << idx[0] << idx[1] << targetX << targetY << '\n';
-	}
-	*/
 
 	int lIdx[2] = { idx[0], idx[1] - 1 };// left
 	int tIdx[2] = { idx[0] - 1, idx[1] };// top
@@ -266,10 +281,6 @@ void updateDirectionOfGhost(Ghost& ghost, float targetX, float targetY, bool sho
 
 	ghost.setNextDirection(newDir);
 	ghost.updateDirection();
-
-	//if (ghost.getGhostname() == Ghost::INKY) {
-	//	cout << idx[0] << idx[1] << inky.getCurrentDirection() << newDir  << '\n';
-	//}
 
 	// 현재 상태에 맞게 속도 조절 -> frightened 느리고, eaten 빠르게
 	if (ghost.getState() == Ghost::GHOSTSTATE::CHASE || ghost.getState() == Ghost::GHOSTSTATE::SCATTER) {
@@ -554,11 +565,11 @@ void resetGame() {
 	th8 = 1200;
 	th9 = 200;
 
-	initializeGhost(blinky, 1, 26, blinkyMtl);
-	initializeGhost(pinky, 1, 1, pinkyMtl);
-	initializeGhost(inky, 29, 26, inkyMtl);
-	initializeGhost(clyde, 29, 1, clydeMtl);
 	ghostroom.initialize();
+	initializeGhost(blinky, 11, 13, blinkyMtl);
+	initializeGhost(pinky, 11, 13, pinkyMtl, 0);
+	initializeGhost(inky, 11, 13, inkyMtl, 1);
+	initializeGhost(clyde, 11, 13, clydeMtl, 2);
 	glutPostRedisplay();
 }
 
@@ -576,9 +587,13 @@ void idle() {
 		}
 		else if (gs == PLAY) {
 			//-------------------------------(gameTimer)-------------------------------
-			if (frightenedTimer.getState() == Timer::STATE::NON_WORKING)
+			if (frightenedTimer.getState() == Timer::STATE::NON_WORKING) {
 				gameTimer.update(deltaTime);
-			// cout << currState << '\n';
+			}
+			else {
+				if (gameTimer.getState() == Timer::STATE::GAMECLEAR)
+					gameTimer.update(deltaTime);
+			}
 			// READY: 처음시작과 RESPONSE 이후 실행
 			if (gameTimer.getState() == Timer::STATE::READY) {
 				bool isplay = gameTimer.checkchange(Timer::SCATTER, gameTimer.getreadyTime());
@@ -806,18 +821,15 @@ void idle() {
 					continue;
 				}
 				pacman.setCollided(false); // 충돌 초기화
-				// cout << ghost->getState();
 				switch (ghost->getState()) {
 				case Ghost::GHOSTSTATE::SCATTER:
 				case Ghost::GHOSTSTATE::CHASE: {
 					// RESPONSE 상태로 진입
 					if (pacman.getLife() == 0) {
-						gameTimer.initialize(Timer::STATE::GAMEOVER, 0);
-						// cout << "진입1" << '\n';
+						gameTimer.initialize(Timer::STATE::GAMEOVER, 0);;
 					}
 					else {
 						gameTimer.initialize(Timer::STATE::RESPONSE, 0);
-						// cout << "진입2" << '\n';
 					}
 					break;
 				}
@@ -862,10 +874,10 @@ void keyboardDown(unsigned char key, int x, int y) {
 		pacman.setLife(life_base);
 
 		// Ghosts Initialization
-		initializeGhost(blinky, 1, 26, blinkyMtl);
-		initializeGhost(pinky, 1, 1, pinkyMtl);
-		initializeGhost(inky, 29, 26, inkyMtl);
-		initializeGhost(clyde, 29, 1, clydeMtl);
+		initializeGhost(blinky, 11, 13, blinkyMtl);
+		initializeGhost(pinky, 11, 13, pinkyMtl, 0);
+		initializeGhost(inky, 11, 13, inkyMtl, 1);
+		initializeGhost(clyde, 11, 13, clydeMtl, 2);
 
 		//Timer Initialization
 		gameTimer.initialize(Timer::STATE::READY, 0);

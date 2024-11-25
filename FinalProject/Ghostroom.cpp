@@ -275,7 +275,6 @@ void GhostRoom::moveGhostToMap(Ghost& ghost, Ghost::GHOSTSTATE currState) {
 				else {
 					ghost.setIndexPosition(11, 14);
 					ghost.setIndexPositionUpdated(true);
-					// cout << "리셋" << endl;
 					ghost.setCurrentDirection(Sphere::NONE);
 					ghost.setNextDirection(Sphere::NONE);
 					ghost.setVelocity(0.0f, 0.0f, 0.0f);
@@ -306,7 +305,6 @@ void GhostRoom::moveGhostToMap(Ghost& ghost, Ghost::GHOSTSTATE currState) {
 				else {
 					ghost.setIndexPosition(11, 13);
 					ghost.setIndexPositionUpdated(true);
-					// cout << "리셋" << endl;
 					ghost.setCurrentDirection(Sphere::NONE);
 					ghost.setNextDirection(Sphere::NONE);
 					ghost.setVelocity(0.0f, 0.0f, 0.0f);
@@ -325,7 +323,6 @@ void GhostRoom::moveGhostToMap(Ghost& ghost, Ghost::GHOSTSTATE currState) {
 				else {
 					ghost.setIndexPosition(11, 14);
 					ghost.setIndexPositionUpdated(true);
-					// cout << "리셋" << endl;
 					ghost.setCurrentDirection(Sphere::NONE);
 					ghost.setNextDirection(Sphere::NONE);
 					ghost.setVelocity(0.0f, 0.0f, 0.0f);
@@ -362,10 +359,8 @@ void GhostRoom::updatetime(int t) {
 	for (auto& i : in_ghosts_time) {
 		if (i != -1) {
 			i += t;
-			// cout << i << ' ';
 		}	
 	}
-	//cout << '\n';
 }
 
 void GhostRoom::settime(int i, int t) {
@@ -382,6 +377,12 @@ int GhostRoom::checktime() {
 		}
 	}
 	return idx;
+}
+
+void GhostRoom::setGhostinIndex(Ghost& g, int i) {
+	in_ghosts[i] = & g;
+	in_ghosts_time[i] = 0;
+	cout << in_ghosts_time[i] << '\n';
 }
 
 void GhostRoom::initialize() {
