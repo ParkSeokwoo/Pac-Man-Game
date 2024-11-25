@@ -257,13 +257,27 @@ Map::Map() {
 // 4번 수정 
 void Map::createMap() {
 	if (state == MAP_STATE::INIT) {
-		resetBlocks(false);
+		resetBlocks(false, false);
 		std::ifstream file("initial_boxtype.txt");
 		while (file) {
-			int x, y;
-			file >> x >> y;
+			int x, y, t;
+			float r;
+			file >> x >> y >> r >> t;
 			blocks[x][y].setPassable(false);
+			blocks[x][y].setRotate(r);
+			blocks[x][y].setBoxType(static_cast<Block::BOX_TYPE>(t));
+			blocks[x][y].setPoint(Block::POINT_TYPE::NOPT);
 		}
+		float x = LEFT_BOUNDARY;
+		float y = TOP_BOUNDARY;
+		for (int i = 0; i < blocks.size(); i++) {
+			for (int j = 0; j < blocks[i].size(); j++) {
+				blocks[i][j].setCenter(x + j * BLOCK_SIZE, y - i * BLOCK_SIZE, 0.0f);
+				blocks[i][j].setWidth(BLOCK_SIZE);
+				blocks[i][j].setHeight(BLOCK_SIZE);
+			}
+		}
+		file.close();
 	}
 	else if (state == MAP_STATE::ST1) {
 		resetBlocks(true);
@@ -323,8 +337,19 @@ void Map::createMap() {
 			}
 		}
 	}
-	else if (state == MAP_STATE::GAMEOVER) {
-
+	else if (state == MAP_STATE::GAMEEND) {
+		resetBlocks(false);
+		std::ifstream file("initial_boxtype.txt");
+		while (file) {
+			int x, y, t;
+			float r;
+			file >> x >> y >> r >> t;
+			blocks[x][y].setPassable(false);
+			blocks[x][y].setRotate(r);
+			blocks[x][y].setBoxType(static_cast<Block::BOX_TYPE>(t));
+			blocks[x][y].setPoint(Block::POINT_TYPE::NOPT);
+		}
+		file.close();
 	}
 }
 //
@@ -361,13 +386,16 @@ Map::MAP_STATE Map::getState() const {
 void Map::setState(Map::MAP_STATE s) {
 	state = s;
 }
-void Map::resetBlocks(bool bpt) {
+void Map::resetBlocks(bool bpt, bool bPassible) {
 	// 모든 Block 객체를 기본값으로 초기화
 	for (auto& row : blocks) {
 		for (auto& block : row) {
 			block = Block(); // Block의 기본 생성자 호출
 			if (!bpt) {
 				block.setPoint(Block::POINT_TYPE::NOPT);
+			}
+			if (!bPassible) {
+				block.setPassable(false);
 			}
 		}
 	}

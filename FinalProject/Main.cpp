@@ -20,7 +20,7 @@ using namespace std;
 const int FPS = 60;
 int sTime = 0;
 int eTime = 0;
-int life_base = 2;
+int life_base = 1;
 int clear_criteria = 100; // 초기에 241개
 
 Light light((float)BOUNDARY_X, (float)BOUNDARY_Y, (float)BOUNDARY_X / 2.0f, GL_LIGHT0);
@@ -37,7 +37,7 @@ GhostRoom ghostroom;
 CollisionHandler colHandler;
 Material pacmanMtl, blinkyMtl, pinkyMtl, inkyMtl, clydeMtl, eatenMtl, frightenedMtl;
 Ghost::GHOSTSTATE currState;
-Texture logo_texture, ready_texture, gameover_texture;
+Texture pacman_logo_texture, ready_text_texture, gameover_text_texture, start_text_texture, yourscore_text_texture, scoreboard_text_texture, newhighscore_text_texture, restart_text_texture;
 
 enum GAME_STATE { INIT, PLAY, GAMEEND };
 GAME_STATE gs = INIT;
@@ -133,9 +133,25 @@ void initialize() {
     map.createMap();
 
 	// Texture Initialization
-	logo_texture.initializeTexture("Pac-Man_Logo.png");
-	gameover_texture.initializeTexture("gameover.png");
-	ready_texture.initializeTexture("ready.png");
+	pacman_logo_texture.initializeTexture("pacman_logo.png");
+	start_text_texture.initializeTexture("start_text.png");
+	gameover_text_texture.initializeTexture("gameover_text.png");
+	ready_text_texture.initializeTexture("ready_text.png");
+	yourscore_text_texture.initializeTexture("yourscore_text.png");
+	scoreboard_text_texture.initializeTexture("scoreboard_text.png");
+	newhighscore_text_texture.initializeTexture("newhighscore_text.png");
+	restart_text_texture.initializeTexture("restart_text.png");
+
+	// PacMan Initialization
+	pacman.setIndexPosition(21, 5);
+	pacman.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+	pacman.setMTL(pacmanMtl);
+
+	// Ghosts Initialization
+	initializeGhost(blinky, 15, 5, blinkyMtl);
+	initializeGhost(pinky, 13, 5, pinkyMtl);
+	initializeGhost(inky, 11, 5, inkyMtl);
+	initializeGhost(clyde, 9, 5, clydeMtl);
 }
 
 void updateDirectionOfPacMan() {
@@ -583,7 +599,8 @@ void idle() {
 		sTime = eTime;
 
 		if (gs == INIT) {
-
+			updatePacMan();
+			updateGhost();
 		}
 		else if (gs == PLAY) {
 			//-------------------------------(gameTimer)-------------------------------
@@ -654,7 +671,7 @@ void idle() {
 
 				if (isover) {
 					gs = GAMEEND;
-					map.setState(Map::MAP_STATE::INIT);
+					map.setState(Map::MAP_STATE::GAMEEND);
 					map.createMap();
 					return;
 				}
@@ -688,7 +705,7 @@ void idle() {
 
 				if (isend) {
 					gs = GAMEEND;
-					map.setState(Map::MAP_STATE::INIT);
+					map.setState(Map::MAP_STATE::GAMEEND);
 					map.createMap();
 					return;
 				}
@@ -825,6 +842,7 @@ void idle() {
 				case Ghost::GHOSTSTATE::SCATTER:
 				case Ghost::GHOSTSTATE::CHASE: {
 					// RESPONSE 상태로 진입
+					// cout << pacman.getLife() << '\n';
 					if (pacman.getLife() == 0) {
 						gameTimer.initialize(Timer::STATE::GAMEOVER, 0);;
 					}
@@ -862,6 +880,78 @@ void idle() {
 //		glutBitmapCharacter(font, str[i]);
 //}
 
+void drawTexture(const Texture& texture, float x, float y, float width, float r) {
+	float height = width * r;
+	glEnable(GL_TEXTURE_2D);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 0.0f); glVertex2f(x - width / 2, y - height /2);
+	glTexCoord2f(0.0f, 1.0f); glVertex2f(x - width / 2, y + height / 2);     
+	glTexCoord2f(1.0f, 1.0f); glVertex2f(x + width / 2, y + height / 2); 
+	glTexCoord2f(1.0f, 0.0f); glVertex2f(x + width / 2, y - height / 2);    
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+}
+
+void display() {
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-BOUNDARY_X, BOUNDARY_X, -BOUNDARY_Y, BOUNDARY_Y, -100.0, 100.0);
+	// gluOrtho2D(-BOUNDARY_X, BOUNDARY_X, -BOUNDARY_Y, BOUNDARY_Y);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	// Draw texture
+	if (gs == INIT) {
+		drawTexture(pacman_logo_texture, 0, +BOUNDARY_Y / 1.5f, BOUNDARY_X * 1.6f, 0.9f *pacman_logo_texture.getAspectRatio());
+		drawTexture(start_text_texture, 0, -BOUNDARY_Y / 1.7f, BOUNDARY_X * 1.5f, start_text_texture.getAspectRatio());
+		drawTexture(scoreboard_text_texture, 0, -BOUNDARY_Y / 1.24f, BOUNDARY_X * 0.4f, scoreboard_text_texture.getAspectRatio());
+	}
+	
+	// Draw 2D
+	map.draw();
+
+	// Draw 3D
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glEnable(light.getID());
+	light.draw();
+
+	// Enable blending for transparent objects
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	if (gs == PLAY) {
+		// Draw pacman 
+		pacman.draw();
+		// Draw ghosts
+		for (auto* ghost : ghosts) {
+			if (ghost->getAlpha() > 0)
+				ghost->draw();
+		}
+		if (gameTimer.getState() == Timer::STATE::READY) {
+			drawTexture(ready_text_texture, -2, -20, 45, ready_text_texture.getAspectRatio());
+		}
+		else if (gameTimer.getState() == Timer::STATE::GAMEOVER && gameTimer.getelapsedTime() >= responseTime) {
+			drawTexture(gameover_text_texture, -5, -20, 50, gameover_text_texture.getAspectRatio());
+		}
+	}
+
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glDisable(light.getID());
+
+	glutSwapBuffers();
+}
+
 void keyboardDown(unsigned char key, int x, int y) {
 	if (tolower(key) == ' ' && gs == INIT) {
 		gs = PLAY;
@@ -893,76 +983,6 @@ void keyboardDown(unsigned char key, int x, int y) {
 	else if (key == 27) { // ESC
 		exit(0);
 	}
-}
-
-void drawTexture(const Texture& texture, float x, float y, float width, float r) {
-	float height = width * r;
-	glEnable(GL_TEXTURE_2D);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
-
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f); glVertex2f(x - width / 2, y - height /2);
-	glTexCoord2f(0.0f, 1.0f); glVertex2f(x - width / 2, y + height / 2);     
-	glTexCoord2f(1.0f, 1.0f); glVertex2f(x + width / 2, y + height / 2); 
-	glTexCoord2f(1.0f, 0.0f); glVertex2f(x + width / 2, y - height / 2);    
-	glEnd();
-
-	glDisable(GL_TEXTURE_2D);
-}
-
-void display() {
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(-BOUNDARY_X, BOUNDARY_X, -BOUNDARY_Y, BOUNDARY_Y, -100.0, 100.0);
-	// gluOrtho2D(-BOUNDARY_X, BOUNDARY_X, -BOUNDARY_Y, BOUNDARY_Y);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	// Draw texture
-	if (gs == INIT) {
-		drawTexture(logo_texture, 0, +BOUNDARY_Y / 1.5f, BOUNDARY_X * 1.8f, logo_texture.getAspectRatio());
-	}
-	
-	// Draw 2D
-	map.draw();
-
-	// Draw 3D
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
-	glEnable(light.getID());
-	light.draw();
-
-	// Enable blending for transparent objects
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	if (gs == PLAY) {
-		// Draw pacman 
-		pacman.draw();
-		// Draw ghosts
-		for (auto* ghost : ghosts) {
-			if (ghost->getAlpha() > 0)
-				ghost->draw();
-		}
-		if (gameTimer.getState() == Timer::STATE::READY) {
-			drawTexture(ready_texture, -2, -20, 45, ready_texture.getAspectRatio());
-		}
-		else if (gameTimer.getState() == Timer::STATE::GAMEOVER && gameTimer.getelapsedTime() >= responseTime) {
-			drawTexture(gameover_texture, -5, -20, 50, gameover_texture.getAspectRatio());
-		}
-	}
-
-	glDisable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-	glDisable(light.getID());
-
-	glutSwapBuffers();
 }
 
 void specialKeyDown(int key, int x, int y) {

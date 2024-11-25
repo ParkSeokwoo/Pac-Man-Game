@@ -53,7 +53,7 @@ class Map
 {
 public:
 	Map();
-	enum MAP_STATE {INIT, ST1, ST2, GAMEOVER};
+	enum MAP_STATE {INIT, ST1, ST2, GAMEEND};
 
 	void createMap();
 
@@ -68,7 +68,7 @@ public:
 	MAP_STATE getState() const;
 	
 	void setState(MAP_STATE s);
-	void resetBlocks(bool bpt); // 추가: blocks를 기본값으로 초기화
+	void resetBlocks(bool bpt, bool bPassible = true); // 추가: blocks를 기본값으로 초기화
 
 	bool isGameClear(int v);
 	Vector3f getBox_Color(int x, int y) const;
