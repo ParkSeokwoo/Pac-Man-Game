@@ -83,6 +83,7 @@ void init_pacman_ghost() {
 	pacman.setAlpha(1.0f);
 	pacman.setCurrentDirection(Sphere::NONE);
 	pacman.setNextDirection(Sphere::NONE);
+	pacman.setLife(life_base);
 
 	// Ghosts Initialization
 	initializeGhost(blinky, 15, 5, blinkyMtl);
@@ -95,6 +96,7 @@ void init_pacman_ghost() {
 		ghost->setCurrentDirection(Sphere::NONE);
 		ghost->setNextDirection(Sphere::NONE);
 		ghost->setIndexPositionUpdated(true);
+		ghost->setState(Ghost::CHASE);
 	}
 }
 
@@ -366,7 +368,26 @@ void updateDirectionOfGhost(Ghost& ghost, float targetX, float targetY, bool sho
 
 	ghost.setNextDirection(newDir);
 	ghost.updateDirection();
-
+	if (gs == INIT) {
+		switch (ghost.getCurrentDirection()) {
+		case Sphere::DIRECTION::LEFT: {
+			ghost.setVelocity(-MOVE_SPEED, 0.0f, 0.0f);
+			break;
+		}
+		case Sphere::DIRECTION::RIGHT: {
+			ghost.setVelocity(MOVE_SPEED, 0.0f, 0.0f);
+			break;
+		}
+		case Sphere::DIRECTION::DOWN: {
+			ghost.setVelocity(0.0f, -MOVE_SPEED, 0.0f);
+			break;
+		}
+		case Sphere::DIRECTION::UP: {
+			ghost.setVelocity(0.0f, MOVE_SPEED, 0.0f);
+			break;
+		}
+		}
+	}
 	// 현재 상태에 맞게 속도 조절 -> frightened 느리고, eaten 빠르게
 	if (ghost.getState() == Ghost::GHOSTSTATE::CHASE || ghost.getState() == Ghost::GHOSTSTATE::SCATTER) {
 		switch (ghost.getCurrentDirection()) {
@@ -699,9 +720,10 @@ void idle() {
 				gameTimer.update(deltaTime);
 			}
 			else {
-				if (gameTimer.getState() == Timer::STATE::GAMECLEAR)
+				if (gameTimer.getState() == Timer::STATE::GAMECLEAR || gameTimer.getState() == Timer::STATE::GAMEOVER)
 					gameTimer.update(deltaTime);
 			}
+
 			// READY: 처음시작과 RESPONSE 이후 실행
 			if (gameTimer.getState() == Timer::STATE::READY) {
 				bool isplay = gameTimer.checkchange(Timer::SCATTER, gameTimer.getreadyTime());
@@ -930,6 +952,7 @@ void idle() {
 				}
 				pacman.setCollided(false); // 충돌 초기화
 				switch (ghost->getState()) {
+				case Ghost::GHOSTSTATE::GHOSTROOM:
 				case Ghost::GHOSTSTATE::SCATTER:
 				case Ghost::GHOSTSTATE::CHASE: {
 					// RESPONSE 상태로 진입

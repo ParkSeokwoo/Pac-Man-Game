@@ -1,2 +1,38 @@
-﻿  Ghostroom.cpp
+﻿  Main.cpp
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(26,69): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(26,39): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(26,20): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(220,22): warning C4244: '초기화 중': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(479,45): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(479,36): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(503,47): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(503,38): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(515,47): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(515,38): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(529,67): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(529,62): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(530,74): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(530,57): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(531,69): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(531,64): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(532,73): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(532,56): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(533,55): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(533,46): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(546,46): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(546,37): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(569,90): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(569,52): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(584,45): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(584,36): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(598,51): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(598,42): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(610,46): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(610,37): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(1027,70): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(1027,51): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(1028,69): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(1028,50): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(1029,75): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\james\source\repos\FinalProject\Pac-Man-game\FinalProject\Main.cpp(1029,55): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
   FinalProject.vcxproj -> C:\Users\james\source\repos\FinalProject\Pac-Man-game\x64\Debug\FinalProject.exe
