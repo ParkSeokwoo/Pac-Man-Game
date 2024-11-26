@@ -607,13 +607,17 @@ void updateGhost() {
 
 void updateGhostRoom(int dt) {
 	ghostroom.updatetime(dt);
+
 	int i = ghostroom.checktime();
-	if (i == 1)
+
+	if (i == 1 && abs(ghostroom.getGhost(i)->getCenter()[1] - 10) <= 0.24)
 		ghostroom.getGhost(i)->setVelocity(+0.6f * MOVE_SPEED, 0.0f, 0.0f);
-	else if (i == 2)
+	else if (i == 2 && abs(ghostroom.getGhost(i)->getCenter()[1] - 10) <= 0.24)
 		ghostroom.getGhost(i)->setVelocity(-0.6f * MOVE_SPEED, 0.0f, 0.0f);
-	else if (i == 0)
+	else if (i == 0 && abs(ghostroom.getGhost(i)->getCenter()[1] - 10) <= 0.24)
 		ghostroom.getGhost(i)->setVelocity(0.0f, +0.6f * MOVE_SPEED, 0.0f);
+
+	ghostroom.updatelocate();
 }
 
 GameTimer gameTimer;

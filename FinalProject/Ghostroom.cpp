@@ -11,6 +11,9 @@ GhostRoom::GhostRoom() {
 	for (auto& ghost : in_ghosts) {
 		ghost = new Ghost(); 
 	}
+	speed = 0.6f * MOVE_SPEED;
+	locate = 10;
+	center_locate = { 100.0f, 100.0f, 100.0f };
 }
 
 void GhostRoom::moveGhostToRoom(Ghost& ghost, Ghost::GHOSTSTATE currState) {
@@ -379,6 +382,59 @@ int GhostRoom::checktime() {
 void GhostRoom::setGhostinIndex(Ghost& g, int i) {
 	in_ghosts[i] = & g;
 	in_ghosts_time[i] = 0;
+}
+
+void GhostRoom::updatelocate() {
+	//cout << "1번 :"<< locate << speed << '\n';
+	locate += speed;
+	float radius = R_RATIO * BLOCK_SIZE;
+	//cout << "2번 :" << locate <<" " << TOP_BOUNDARY - 12 * BLOCK_SIZE <<" "<< radius << '\n';
+	if (speed > 0) {
+		if (locate + radius >= TOP_BOUNDARY - 12 * BLOCK_SIZE) {
+			locate = TOP_BOUNDARY - 12 * BLOCK_SIZE - radius;
+			speed = -speed;
+		}
+			
+	}
+	else {
+		if (locate - radius <= TOP_BOUNDARY - 16 * BLOCK_SIZE) {
+			locate = TOP_BOUNDARY - 16 * BLOCK_SIZE + radius;
+			speed = -speed;
+		}
+	}
+	updatecenter();
+}
+
+void GhostRoom::updatecenter() {
+	//for (auto& ghost : in_ghosts) {
+	//	if (ghost->getGhostname() != Ghost::NONE && ghost->getVelocity()[0] == 0 && ghost->getVelocity()[1] == 0) {
+	//		//cout << "3번 :" << ghost->getCenter()[1] << locate << '\n';
+	//		ghost->setCenter(ghost->getCenter()[0], locate, 0.0f);
+	//		//cout << "4번 :" << ghost->getCenter()[1] << '\n';
+	//	}
+	//}
+	for (int i = 0; i < 3; i++) {
+		if (in_ghosts[i]->getGhostname() != Ghost::NONE && in_ghosts[i]->getVelocity()[0] == 0 && in_ghosts[i]->getVelocity()[1] == 0) {
+			if (i == 0) {
+				if (in_ghosts[i]->getCenter()[1] == 10) {
+					if (abs(locate - 10)<=0.24)
+						in_ghosts[i]->setCenter(in_ghosts[i]->getCenter()[0], 20 - locate, 0.0f);
+				}
+				else {
+					in_ghosts[i]->setCenter(in_ghosts[i]->getCenter()[0], 20 - locate, 0.0f);
+				}
+			}
+			else {
+				if (in_ghosts[i]->getCenter()[1] == 10) {
+					if (abs(locate - 10) <= 0.24)
+						in_ghosts[i]->setCenter(in_ghosts[i]->getCenter()[0], locate, 0.0f);
+				}
+				else {
+					in_ghosts[i]->setCenter(in_ghosts[i]->getCenter()[0], locate, 0.0f);
+				}
+			}
+		}
+	}
 }
 
 void GhostRoom::initialize() {

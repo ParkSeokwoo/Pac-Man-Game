@@ -23,11 +23,17 @@ public:
 	int checktime();
 	// i 위치에 ghost 넣기
 	void setGhostinIndex(Ghost& g, int i);
-
+	// 속도에 따라 위치 0번째 인덱스의 위치 이동
+	void updatelocate();
+	// locate에 따라 원 업데이트
+	void updatecenter();
 	void initialize();
 
 private:
 	array<Ghost*, 3>  in_ghosts;
 	array<int, 3> in_ghosts_time;
 	int in_time;
+	float speed;
+	float locate;
+	array<float, 3> center_locate;
 };
