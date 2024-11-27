@@ -20,8 +20,8 @@ using namespace std;
 const int FPS = 60;
 int sTime = 0;
 int eTime = 0;
-int life_base = 1;
-int clear_criteria = 100; // 초기에 241개
+int life_base = 2;
+int clear_criteria = 150; // 초기에 241개
 
 Light light((float)BOUNDARY_X, (float)BOUNDARY_Y, (float)BOUNDARY_X / 2.0f, GL_LIGHT0);
 
@@ -698,6 +698,8 @@ void resetGame() {
 	initializeGhost(inky, 11, 13, inkyMtl, 1);
 	initializeGhost(clyde, 11, 13, clydeMtl, 2);
 	glutPostRedisplay();
+
+	currState = Ghost::GHOSTSTATE::SCATTER;
 }
 
 void idle() {
@@ -838,7 +840,7 @@ void idle() {
 					}
 				}
 				else
-					currState = Ghost::GHOSTSTATE::CHASE;
+					//currState = Ghost::GHOSTSTATE::CHASE;
 
 				if (frightenedTimer.getState() != Timer::STATE::NON_WORKING)
 					frightenedTimer.update(deltaTime);
@@ -855,7 +857,7 @@ void idle() {
 					}
 				}
 				else
-					currState = Ghost::GHOSTSTATE::SCATTER;
+					// currState = Ghost::GHOSTSTATE::SCATTER;
 
 				if (frightenedTimer.getState() != Timer::STATE::NON_WORKING)
 					frightenedTimer.update(deltaTime);
