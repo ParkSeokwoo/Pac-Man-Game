@@ -100,6 +100,22 @@ StyleCopReport.xml
 *.svclog
 *.scc
 
+# 빌드 파일 제외
+*.log
+*.tlog
+*.obj
+*.idb
+*.pdb
+
+# Visual Studio 임시 파일 제외
+*.suo
+*.user
+*.userosscache
+*.unsaved
+*.vcxproj.user
+*.vcxproj.filters
+*.ipcz
+
 # Chutzpah Test files
 _Chutzpah*
 
