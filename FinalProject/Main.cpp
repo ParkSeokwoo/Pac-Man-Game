@@ -1,14 +1,14 @@
 #include <iostream>
 #include <vector>
-
 #include "Constants.h"
-
+#include <string>
 #include "Light.h"
 #include "Sphere.h"
 #include "Map.h"
 #include "Timer.h"
 #include "Texture.h"
 #include "GhostRoom.h"
+#include "Music.h"
 
 #include "CollisionHandler.h"
 #include <GL/freeglut.h>
@@ -20,9 +20,9 @@ using namespace std;
 const int FPS = 60;
 int sTime = 0;
 int eTime = 0;
-int life_base = 2;
+int life_base = 1;
 int clear_criteria = 150; // 초기에 241개
-
+bool hasShownInput = false;
 Light light((float)BOUNDARY_X, (float)BOUNDARY_Y, (float)BOUNDARY_X / 2.0f, GL_LIGHT0);
 
 PacMan pacman(BLOCK_SIZE / 2.0f, 20, 20, false);
@@ -37,10 +37,57 @@ GhostRoom ghostroom;
 CollisionHandler colHandler;
 Material pacmanMtl, blinkyMtl, pinkyMtl, inkyMtl, clydeMtl, eatenMtl, frightenedMtl;
 Ghost::GHOSTSTATE currState;
-Texture pacman_logo_texture, ready_text_texture, gameover_text_texture, start_text_texture, yourscore_text_texture, scoreboard_text_texture, newhighscore_text_texture, restart_text_texture;
+Texture pacman_logo_texture, ready_text_texture, gameover_text_texture, start_text_texture, yourscore_text_texture, scoreboard_text_texture, newhighscore_text_texture, restart_text_texture, scoreboard_texture,  gameend_texture, showinput_texture, pacman_texture, life_texture;
+wstring chromp_wav, cutscene_wav, dead_wav, intro_wav, pacman_eatghost_wav, pacman_move_wav;
+string file;
 
 enum GAME_STATE { INIT, PLAY, GAMEEND };
 GAME_STATE gs = INIT;
+
+//score related..
+#include <sstream>
+#include <fstream>
+#include <algorithm>
+
+ostringstream oss;
+ofstream ofs;
+
+struct Score {
+	string name;
+	int score;
+};
+
+vector<Score> ScoreSaved;
+bool ShowingInput = false;
+bool ShowScoreBoard = false;
+string player_name = "";
+int player_score = 0;
+
+vector<Score> get5Scores() {
+	ifstream scoretext("SCORE.txt");
+	vector<Score> scores;
+	string name;
+	int score;
+	while (scoretext >> name >> score) {
+		scores.push_back({ name, score });
+	}
+	scoretext.close();
+
+	sort(scores.begin(), scores.end(), [](const Score& a, const Score& b) {
+		return a.score > b.score;
+		});
+
+	if (scores.size() > 5) scores.resize(5);
+	return scores;
+}
+
+void savescore(const string& name, int score) {
+	ofstream savescore("SCORE.txt", ios::app);
+	if (savescore.is_open()) {
+		savescore << name << " " << score << endl;
+	}
+	savescore.close();
+}
 
 void initializeMaterial(Material& mtl, const std::array<float, 4>& emission, const std::array<float, 4>& ambient, const std::array<float, 4>& diffuse, const std::array<float, 4>& specular, float shininess) {
 	mtl.setEmission(emission[0], emission[1], emission[2], emission[3]);
@@ -167,7 +214,28 @@ void initialize() {
 	newhighscore_text_texture.initializeTexture("newhighscore_text.png");
 	restart_text_texture.initializeTexture("restart_text.png");
 
+	pacman_texture.initializeTexture("pacman.png");
+	life_texture.initializeTexture("life.png");
+	scoreboard_texture.initializeTexture("scoreboard.png");
+	gameend_texture.initializeTexture("GameEnd.png");
+	showinput_texture.initializeTexture("ShowInput.png");
 	init_pacman_ghost();
+
+	// 각 파일 이름 정의
+	std::string file1 = "chromp.wav";
+	std::string file2 = "cutscene.wav";
+	std::string file3 = "dead.wav";
+	std::string file4 = "intro.wav";
+	std::string file5 = "pacman_eatghost.wav";
+	std::string file6 = "pacman_move.wav";
+
+	// 각각의 std::wstring 변수에 값 저장
+	chromp_wav.assign(file1.begin(), file1.end());
+	cutscene_wav.assign(file2.begin(), file2.end());
+	dead_wav.assign(file3.begin(), file3.end());
+	intro_wav.assign(file4.begin(), file4.end());
+	pacman_eatghost_wav.assign(file5.begin(), file5.end());
+	pacman_move_wav.assign(file6.begin(), file6.end());
 }
 
 void updateDirectionOfPacMan(int targetX = 0, int targetY = 0) {
@@ -473,9 +541,7 @@ void updateGhost() {
 	if (gs == INIT) {
 		for (auto* ghost : ghosts) {
 			bool IdxPosUpdated = ghost->isIndexPositionUpdated();
-			// cout << 1 << '\n';
 			if (IdxPosUpdated) {
-				// cout << 2 << '\n';
 				updateDirectionOfGhost(*ghost, targetx, targety);
 			}
 			ghost->move();
@@ -557,8 +623,6 @@ void updateGhost() {
 				if (iIdxPosUpdated) {
 					switch (inky.getState()) {
 					case Ghost::GHOSTSTATE::CHASE:
-
-						// cout << inky.getState() << inky.getCurrentDirection() << '\n';
 						switch (pacman.getCurrentDirection()) {
 						case Sphere::UP: inkytargetx -= 2; break;
 						case Sphere::RIGHT: inkytargety += 2; break;
@@ -567,8 +631,6 @@ void updateGhost() {
 						default: break;
 						}
 						updateDirectionOfGhost(inky, 2 * inkytargetx - blinky.getXIndex(), 2 * inkytargety - blinky.getYIndex());
-
-						// cout << inky.getCurrentDirection() << ' ' << inky.getVelocity()[0] << ' ' << inky.getVelocity()[1] << '\n';
 						break;
 					case Ghost::GHOSTSTATE::SCATTER:
 						updateDirectionOfGhost(inky, 30, 27);
@@ -702,6 +764,13 @@ void resetGame() {
 	currState = Ghost::GHOSTSTATE::SCATTER;
 }
 
+void renderBitmapString(float x, float y, void* font, const std::string& str) {
+	glRasterPos2f(x, y);
+	for (char c : str) {
+		glutBitmapCharacter(font, c);
+	}
+}
+
 void idle() {
 	float spf = 1000.0f / FPS;
 	eTime = glutGet(GLUT_ELAPSED_TIME);
@@ -714,9 +783,25 @@ void idle() {
 			updatePacMan();
 			updateGhost();
 			glutPostRedisplay();
+			hasShownInput = false;
+
+			if (!isMusicPlaying) {
+				playBGM(intro_wav, true);  // 인트로음악 반복재생
+			}
 			return;
 		}
 		else if (gs == PLAY) {
+			if (!intro_done) {
+				stopBGM();  // 인트로 음악 중지
+				intro_done = true;  // intro_done을 true로 설정
+			}
+			//if (pinky.getState() == Ghost::FRIGHTENEND) {
+				//playBGM("CutScene.wav", true);
+			//}
+			//else {
+			if (pacman.getCurrentDirection() == Sphere::NONE) stopBGM();
+			else playBGM(pacman_move_wav, true);
+			//}
 			//-------------------------------(gameTimer)-------------------------------
 			if (frightenedTimer.getState() == Timer::STATE::NON_WORKING) {
 				gameTimer.update(deltaTime);
@@ -981,20 +1066,20 @@ void idle() {
 			}
 			//충돌검사(END);
 			if (map.isGameClear(clear_criteria)) {
+				stopBGM();
 				gameTimer.initialize(Timer::STATE::GAMECLEAR, 0);
 			}
 		}
-
+		else if (gs == GAMEEND) {
+			playBGM(intro_wav, true);
+			if (!hasShownInput) {
+				ShowingInput = true;
+				hasShownInput = true; //처음 입력만 받도록
+			}
+		}
 		glutPostRedisplay();
 	}
 }
-
-//void displayCharacters(void* font, string str, float x, float y) {
-//	glColor3f(1.0f, 1.0f, 1.0f);
-//	glRasterPos2f(x, y);
-//	for (int i = 0; i < str.size(); i++)
-//		glutBitmapCharacter(font, str[i]);
-//}
 
 void drawTexture(const Texture& texture, float x, float y, float width, float r) {
 	float height = width * r;
@@ -1019,7 +1104,6 @@ void display() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-BOUNDARY_X, BOUNDARY_X, -BOUNDARY_Y, BOUNDARY_Y, -100.0, 100.0);
-	// gluOrtho2D(-BOUNDARY_X, BOUNDARY_X, -BOUNDARY_Y, BOUNDARY_Y);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -1030,10 +1114,43 @@ void display() {
 		drawTexture(start_text_texture, 0, -BOUNDARY_Y / 1.7f, BOUNDARY_X * 1.5f, start_text_texture.getAspectRatio());
 		drawTexture(scoreboard_text_texture, 0, -BOUNDARY_Y / 1.24f, BOUNDARY_X * 0.4f, scoreboard_text_texture.getAspectRatio());
 	}
-	
-	// Draw 2D
-	map.draw();
+	if (ShowScoreBoard) {
+		drawTexture(scoreboard_texture, 0, 0, BOUNDARY_X * 1.8f, scoreboard_texture.getAspectRatio());
+		// 상위 5개 점수 출력
+		vector<Score> scores = get5Scores();
+		float y = BOUNDARY_Y - 167;
+		for (const auto& score : scores) {
+			glColor3f(1.0f, 1.0f, 1.0f);
+			renderBitmapString(-BOUNDARY_X + 125, y, GLUT_BITMAP_HELVETICA_18, score.name);
+			renderBitmapString(-BOUNDARY_X + 220, y, GLUT_BITMAP_HELVETICA_18, to_string(score.score));
+			y -= 22;
+		}
+	}
+	if (gs == GAMEEND && ShowingInput) {
+		drawTexture(showinput_texture, 0, 0, BOUNDARY_X * 2.0f, showinput_texture.getAspectRatio());
+		glColor3f(1.0f, 1.0f, 1.0f);
+		renderBitmapString(30, -35, GLUT_BITMAP_TIMES_ROMAN_24, to_string(player_score));
+		renderBitmapString(40, -62, GLUT_BITMAP_TIMES_ROMAN_24, player_name);
 
+	}
+	// Draw 2D
+	if (!(gs == INIT && ShowScoreBoard)) {
+		map.draw();
+	}
+	// life and score
+	if (gs == PLAY) {
+		//draw life
+		drawTexture(life_texture, -BOUNDARY_X + 20, -BOUNDARY_Y + 20, BOUNDARY_X / 5.0f, life_texture.getAspectRatio());
+		for (int i = 0; i < pacman.getLife() - 1; ++i) {
+			drawTexture(pacman_texture, -BOUNDARY_X + 50 + i * 20, -BOUNDARY_Y + 20, BOUNDARY_X / 10.0f, pacman_texture.getAspectRatio());
+		}
+		//display score
+		player_score = -map.getScore() + 2410;
+		if (player_score >= 0) {
+			glColor3f(1.0f, 1.0f, 1.0f);
+			renderBitmapString(-40, BOUNDARY_Y - 20, GLUT_BITMAP_TIMES_ROMAN_24, "Score: " + to_string(player_score));
+		}
+	}
 	// Draw 3D
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
@@ -1045,12 +1162,14 @@ void display() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	if (gs == INIT || gs == PLAY) {
-		// Draw pacman 
-		pacman.draw();
-		// Draw ghosts
-		for (auto* ghost : ghosts) {
-			if (ghost->getAlpha() > 0)
-				ghost->draw();
+		if (!(gs == INIT && ShowScoreBoard)) {
+			// Draw pacman 
+			pacman.draw();
+			// Draw ghosts
+			for (auto* ghost : ghosts) {
+				if (ghost->getAlpha() > 0)
+					ghost->draw();
+			}
 		}
 	}
 	if (gs == PLAY) {
@@ -1061,7 +1180,9 @@ void display() {
 			drawTexture(gameover_text_texture, -5, -20, 50, gameover_text_texture.getAspectRatio());
 		}
 	}
-
+	if (gs == GAMEEND && ShowingInput == false && ShowScoreBoard == false) {
+		drawTexture(gameend_texture, 0, 0, BOUNDARY_X * 2.0f, gameend_texture.getAspectRatio());
+	}
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
@@ -1091,6 +1212,33 @@ void keyboardDown(unsigned char key, int x, int y) {
 	}
 	else if (key == 27) { // ESC
 		exit(0);
+	}
+	if (gs == INIT || gs == GAMEEND) {
+		if (ShowingInput == false) {
+			if (ShowScoreBoard == false && tolower(key) == 's') { // Show Scoreboad 
+				ShowScoreBoard = true;
+			}
+			else if (ShowScoreBoard == true && tolower(key) == 's') { // Hide Scoreboard
+				ShowScoreBoard = false;
+			}
+		}
+	}
+	//saving score..
+	if (gs == GAMEEND && ShowingInput) {
+		if (key == '\r') { // Enter to save
+			savescore(player_name, player_score);
+			player_name = "";
+			player_score = 0;
+			ShowingInput = false;
+			ShowScoreBoard = true;
+			intro_done = false;
+		}
+		else if (key == '\b') { // backspace
+			if (!player_name.empty()) player_name.pop_back();
+		}
+		else {
+			player_name += key;
+		}
 	}
 }
 
@@ -1122,7 +1270,7 @@ int main(int argc, char** argv) {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 	glutInitWindowPosition(WINDOW_X, WINDOW_Y);
 	glutInitWindowSize(WINDOW_W, WINDOW_H);
-	glutCreateWindow("Pac-Man Map");
+	glutCreateWindow("Pac-Man");
 
 	initialize();
 

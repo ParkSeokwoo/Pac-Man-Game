@@ -1,8 +1,9 @@
 #include "CollisionHandler.h"
 #include "CollisionDetector.h"
 #include <iostream>
+#include "Music.h"
 using namespace std;
-
+extern wstring dead_wav, pacman_eatghost_wav;
 
 //true는 통과가능해
 void CollisionHandler::operator()(PacMan& pacman, const Map& map) {
@@ -16,13 +17,17 @@ void CollisionHandler::operator()(PacMan& pacman, const Map& map) {
 // true는 충돌이야
 void CollisionHandler::operator()(PacMan& pacman, Ghost& ghost) {
 	CollisionDetector colDetector;
-	// 수정 1번
 	if (ghost.getState() != Ghost::GHOSTSTATE::EATEN) {
-	//
 		if (colDetector(pacman, ghost)) {
-			if (ghost.getState() != Ghost::GHOSTSTATE::FRIGHTENEND)
+			if (ghost.getState() != Ghost::GHOSTSTATE::FRIGHTENEND) {
+				stopBGM();
 				pacman.setLife(pacman.getLife() - 1);
-			// cout << "LIFE: " << pacman.getLife() << '\n';
+				playBGM(dead_wav, false);
+			}
+			else if (ghost.getState() == Ghost::FRIGHTENEND) {
+				stopBGM();
+				playBGM(pacman_eatghost_wav, false);
+			}
 			pacman.setCollided(true);
 		}
 	}

@@ -419,6 +419,16 @@ void Map::resetBlocks(bool bpt, bool bPassible) {
 		}
 	}
 }
+//score °è»ê
+int Map::getScore() {
+	int count = 0;
+	for (const auto& row : blocks) {
+		count += std::count_if(row.begin(), row.end(), [](const Block& block) {
+			return block.getPoint_type() == Block::POINT_TYPE::SMALL;
+			});
+	}
+	return count * 10;
+}
 bool Map::isGameClear(int v) {
 	int count = 0;
 	for (const auto& row : blocks) {
