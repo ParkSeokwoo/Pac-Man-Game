@@ -1204,7 +1204,7 @@ void keyboardDown(unsigned char key, int x, int y) {
 		blackshownTimer.initialize(Timer::STATE::NON_WORKING, 0);
 		gameTimer.setReadyInitialized(false);
 	}
-	else if (tolower(key) == 'r' && gs == GAMEEND) {
+	else if (tolower(key) == 'r' && gs == GAMEEND && !ShowingInput) {
 		gs = INIT;
 		map.setState(Map::MAP_STATE::INIT);
 		map.createMap();
