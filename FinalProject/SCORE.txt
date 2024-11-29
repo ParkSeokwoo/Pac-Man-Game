@@ -2,3 +2,10 @@ Seokwoo 160
 sfsdf 220
 adsfadf 220
 se 0
+Seokwoo 300
+enter 220
+enter 160
+enter 2410
+enter 610
+ddd 160
+ss 160

@@ -2,8 +2,17 @@
 #include "CollisionDetector.h"
 #include <iostream>
 #include "Music.h"
+#include <string>
 using namespace std;
-extern wstring dead_wav, pacman_eatghost_wav;
+
+extern wstring pacman_move_wav;
+
+std::string file3 = "dead.wav";
+std::string file5 = "pacman_eatghost.wav";
+
+wstring dead_wav = std::wstring(file3.begin(), file3.end());
+wstring pacman_eatghost_wav = std::wstring(file5.begin(), file5.end());
+
 
 //true는 통과가능해
 void CollisionHandler::operator()(PacMan& pacman, const Map& map) {

@@ -7,7 +7,7 @@
 class Sphere : public Shape3D
 {
 public:
-	enum DIRECTION { NONE, LEFT, UP, RIGHT, DOWN };
+	enum DIRECTION { NONE, LEFT, UP, RIGHT, DOWN, WAIT};
 
 	Sphere();
 	Sphere(float r, int sl, int st);
