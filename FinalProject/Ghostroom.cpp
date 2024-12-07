@@ -1,8 +1,10 @@
 #include "GhostRoom.h"
 #include "Constants.h"
 #include "Material.h"
+#include "Timer.h"
 
 extern Material pacmanMtl, blinkyMtl, pinkyMtl, inkyMtl, clydeMtl, eatenMtl, frightenedMtl;
+extern FrightenedTimer frightenedTimer;
 
 GhostRoom::GhostRoom() {
 	in_ghosts = { nullptr, nullptr, nullptr };
@@ -17,7 +19,9 @@ GhostRoom::GhostRoom() {
 }
 
 void GhostRoom::moveGhostToRoom(Ghost& ghost, Ghost::GHOSTSTATE currState) {
-	
+	if (frightenedTimer.getState() != Timer::NON_WORKING) {
+		currState = Ghost::FRIGHTENEND;
+	}
 	int i = getPossibleIndex(ghost);
 	//cout << i << '\n';
 	if (i == 3) {
@@ -32,15 +36,15 @@ void GhostRoom::moveGhostToRoom(Ghost& ghost, Ghost::GHOSTSTATE currState) {
 	}
 	else {
 		if (in_ghosts[i]->getGhostname() != ghost.getGhostname()) {
-			in_ghosts[i] = & ghost;
+			in_ghosts[i] = &ghost;
 		}
 	}
 	if (i == 0) {
-		if (ghost.getYIndex() == 13){
+		if (ghost.getYIndex() == 13) {
 			if (ghost.getCenter()[0] < LEFT_BOUNDARY + 13.5 * BLOCK_SIZE) {
 				ghost.setVelocity(4 * MOVE_SPEED, 0.0f, 0.0f);
 				ghost.setCenter(ghost.getCenter() + ghost.getVelocity());
-			}	
+			}
 			else if (ghost.getCenter()[1] > TOP_BOUNDARY - 14 * BLOCK_SIZE) {
 				ghost.setVelocity(0.0f, -4 * MOVE_SPEED, 0.0f);
 				ghost.setCenter(ghost.getCenter() + ghost.getVelocity());
@@ -194,7 +198,11 @@ void GhostRoom::moveGhostToRoom(Ghost& ghost, Ghost::GHOSTSTATE currState) {
 
 void GhostRoom::moveGhostToMap(Ghost& ghost, Ghost::GHOSTSTATE currState) {
 	int i = getPossibleIndex(ghost);
-	
+	if (frightenedTimer.getState() != Timer::NON_WORKING) {
+		if (ghost.getMTL().getSpecular()[0] == 0.0f) {
+			currState = Ghost::FRIGHTENEND;
+		}
+	}
 	if (i == 0) {
 		if (ghost.getCenter()[1] < TOP_BOUNDARY - 11 * BLOCK_SIZE) {
 			ghost.setVelocity(0.0f, 0.6f * MOVE_SPEED, 0.0f);
@@ -385,10 +393,8 @@ void GhostRoom::setGhostinIndex(Ghost& g, int i) {
 }
 
 void GhostRoom::updatelocate() {
-	//cout << "1번 :"<< locate << speed << '\n';
 	locate += speed;
 	float radius = R_RATIO * BLOCK_SIZE;
-	//cout << "2번 :" << locate <<" " << TOP_BOUNDARY - 12 * BLOCK_SIZE <<" "<< radius << '\n';
 	if (speed > 0) {
 		if (locate + radius >= TOP_BOUNDARY - 12 * BLOCK_SIZE) {
 			locate = TOP_BOUNDARY - 12 * BLOCK_SIZE - radius;
@@ -406,13 +412,6 @@ void GhostRoom::updatelocate() {
 }
 
 void GhostRoom::updatecenter() {
-	//for (auto& ghost : in_ghosts) {
-	//	if (ghost->getGhostname() != Ghost::NONE && ghost->getVelocity()[0] == 0 && ghost->getVelocity()[1] == 0) {
-	//		//cout << "3번 :" << ghost->getCenter()[1] << locate << '\n';
-	//		ghost->setCenter(ghost->getCenter()[0], locate, 0.0f);
-	//		//cout << "4번 :" << ghost->getCenter()[1] << '\n';
-	//	}
-	//}
 	for (int i = 0; i < 3; i++) {
 		if (in_ghosts[i]->getGhostname() != Ghost::NONE && in_ghosts[i]->getVelocity()[0] == 0 && in_ghosts[i]->getVelocity()[1] == 0) {
 			if (i == 0) {

@@ -10,7 +10,7 @@ public:
 	enum DIRECTION { NONE, LEFT, UP, RIGHT, DOWN, WAIT};
 
 	Sphere();
-	Sphere(float r, int sl, int st);
+	Sphere(float r, int sl, int st, bool bCol);
 
 	void setRadius(float r);
 	float getRadius() const;
@@ -27,15 +27,14 @@ public:
 	void setNextDirection(DIRECTION d);
 	DIRECTION getCurrentDirection() const;
 	DIRECTION getNextDirection() const;
-
-	//21¹ø ¼öÁ¤
 	void setAlpha(float newAlpha);
 	float getAlpha() const;
-	//
 	void updateDirection();
 
 	void move();
 	virtual void draw() const;
+	void setCollided(bool bCol);
+	bool getCollided();
 
 protected:
 	float radius;
@@ -44,6 +43,7 @@ protected:
 	float alpha;
 	int idxPos[2];
 	bool bInxPosUpdated;
+	bool bCollided;
 
 	DIRECTION currDirection;
 	DIRECTION nextDirection;
@@ -53,17 +53,13 @@ protected:
 class PacMan : public Sphere
 {
 public:
-	PacMan(float r, int sl, int st, bool bCol);
-
-	void setCollided(bool bCol);
-	bool getCollided();
+	PacMan(float r, int sl, int st);
 	void setLife(int a);
 	int getLife();
 
 	virtual void draw() const;
 
 private:
-	bool bCollided;
 	int life;
 };
 

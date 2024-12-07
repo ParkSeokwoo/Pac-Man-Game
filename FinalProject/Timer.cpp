@@ -81,3 +81,9 @@ BlackshownTimer::BlackshownTimer() : blackshownTime(200) {}
 int BlackshownTimer::getblackshownTime() const {
     return blackshownTime;
 }
+
+GhoststopTimer::GhoststopTimer() : ghoststopTime(400) {}
+
+int GhoststopTimer::getghoststopTime() const {
+    return ghoststopTime;
+}

@@ -358,17 +358,6 @@ void Map::createMap() {
 	}
 	else if (state == MAP_STATE::GAMEEND) {
 		resetBlocks(false);
-		std::ifstream file("initial_boxtype.txt");
-		while (file) {
-			int x, y, t;
-			float r;
-			file >> x >> y >> r >> t;
-			blocks[x][y].setPassable(false);
-			blocks[x][y].setRotate(r);
-			blocks[x][y].setBoxType(static_cast<Block::BOX_TYPE>(t));
-			blocks[x][y].setPoint(Block::POINT_TYPE::NOPT);
-		}
-		file.close();
 	}
 }
 //

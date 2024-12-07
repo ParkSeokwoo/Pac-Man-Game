@@ -1,22 +1,28 @@
-#pragma once
+#ifndef MUSIC_H
+#define MUSIC_H
 
-#include <windows.h>
+#include <fmod.hpp>
 #include <string>
-#include <thread>
-#include <atomic>
-#include <iostream>
-#include "Music.h"
-#include <functional>
+#include <unordered_map>
 
-static std::atomic<bool> isMusicPlaying(false);  // 음악 상태 추적
-static bool intro_done = false;  // 인트로 음악이 끝났는지 확인하는 변수
-static bool frightened_start = false; //frightened 음악 이 끝났는지 확인하는 변수
-static bool gameclear_start = false;
-static bool gameend_start = false;
-static bool gamefail_start = false;
+class MusicManager {
+private:
+    FMOD::System* system; // FMOD 시스템 객체
+    std::unordered_map<std::string, FMOD::Sound*> sounds; // 음악 파일 관리
+    std::unordered_map<std::string, FMOD::Channel*> channels; // 채널 관리
 
-void playBGM(const std::wstring& wfile, bool loop = false, bool overlap = false);
+public:
+    MusicManager();
+    ~MusicManager();
 
-void stopBGM();
+    void initialize(); // FMOD 초기화
+    void loadMusic(const std::string& name, const std::string& filepath, bool loop = false); // 음악 로드
+    void playMusic(const std::string& name, bool restart = false); // 음악 재생
+    void stopMusic(const std::string& name); // 음악 정지
+    void setVolume(const std::string& name, float volume); // 볼륨 설정 
+    void update(); // FMOD 업데이트
+    void cleanup(); // 리소스 해제
+    void stopAllMusic();
+};
 
-void playBGMWithCallback(const std::wstring& wfile, int durationMs, std::function<void()> onFinished);
+#endif // MUSIC_H

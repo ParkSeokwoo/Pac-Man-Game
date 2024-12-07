@@ -6,7 +6,8 @@ public:
         NON_WORKING, 
         READY, CHASE, SCATTER, RESPONSE, GAMEOVER, GAMECLEAR, 
         FRIGHTENED, TRANSITION,
-        BLACKSHOWN
+        BLACKSHOWN,
+        STOPPING, CHANGING
     };
     void update(int deltaTime);
     void setState(STATE s);
@@ -67,6 +68,15 @@ public:
 
 private:
     int blackshownTime;
+};
+
+class GhoststopTimer : public Timer {
+public:
+    GhoststopTimer();
+    int getghoststopTime() const;
+
+private:
+    int ghoststopTime;
 };
 
 

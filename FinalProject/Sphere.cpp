@@ -8,10 +8,10 @@ using namespace std;
 
 //6번 수정
 Sphere::Sphere() : radius(0.0f), slice(0), stack(0), alpha(1.0f), idxPos{ 0, 0 }, bInxPosUpdated(true),
-currDirection(NONE), nextDirection(NONE) {}
-Sphere::Sphere(float r, int sl, int st)
+currDirection(NONE), nextDirection(NONE), bCollided(false) {}
+Sphere::Sphere(float r, int sl, int st, bool bCol)
 	: radius(r), slice(sl), stack(st), alpha(1.0f), idxPos{ 0, 0 }, bInxPosUpdated(true),
-	currDirection(NONE), nextDirection(NONE) {}
+	currDirection(NONE), nextDirection(NONE), bCollided(false) {}
 //
 void Sphere::setRadius(float r) {
 	radius = r;
@@ -149,20 +149,20 @@ void Sphere::draw() const {
 
 	glPopMatrix();
 }
-//
 
-//10번 수정
-PacMan::PacMan(float r, int sl, int st, bool bCol)
-	: Sphere(r, sl, st), bCollided(bCol), life(1) {}
-//
-
-void PacMan::setCollided(bool bCol) {
+void Sphere::setCollided(bool bCol) {
 	bCollided = bCol;
 }
 
-bool PacMan::getCollided() {
+bool Sphere::getCollided() {
 	return bCollided;
 }
+//
+
+//10번 수정
+PacMan::PacMan(float r, int sl, int st)
+	: Sphere(r, sl, st, false), life(1) {}
+//
 
 void PacMan::draw() const {
 	glPushMatrix();
@@ -197,7 +197,7 @@ int PacMan::getLife() {
 Ghost::Ghost(): state(Ghost::GHOSTSTATE::SCATTER), name(Ghost::GHOSTNAME::NONE), isChange_state(false), isInGhostroom(false) {}
 
 Ghost::Ghost(float r, int sl, int st, Ghost::GHOSTSTATE s, Ghost::GHOSTNAME n)
-	: Sphere(r, sl, st), state(s), name(n), isChange_state(false), isInGhostroom(false) {}
+	: Sphere(r, sl, st, false), state(s), name(n), isChange_state(false), isInGhostroom(false) {}
 //
 
 void Ghost::setState(Ghost::GHOSTSTATE s) {

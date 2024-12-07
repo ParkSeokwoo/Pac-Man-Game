@@ -24,13 +24,13 @@ using namespace std;
 const int FPS = 60;
 int sTime = 0;
 int eTime = 0;
-int life_base = 1;
-int clear_criteria = 150; // 초기에 241개
+int life_base = 2;
+int clear_criteria = 180; // 초기에 241개
 bool hasShownInput = false;
 
 Light light((float)BOUNDARY_X, (float)BOUNDARY_Y, (float)BOUNDARY_X / 2.0f, GL_LIGHT0);
 
-PacMan pacman(BLOCK_SIZE / 2.0f, 20, 20, false);
+PacMan pacman(BLOCK_SIZE / 2.0f, 20, 20);
 Ghost blinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::BLINKY);
 Ghost pinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::PINKY);
 Ghost inky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::INKY);
@@ -42,8 +42,10 @@ GhostRoom ghostroom;
 CollisionHandler colHandler;
 Material pacmanMtl, blinkyMtl, pinkyMtl, inkyMtl, clydeMtl, eatenMtl, frightenedMtl;
 Ghost::GHOSTSTATE currState;
-Texture pacman_logo_texture, ready_text_texture, gameover_text_texture, start_text_texture, yourscore_text_texture, scoreboard_text_texture, newhighscore_text_texture, restart_text_texture, scoreboard_texture,  gameend_texture, showinput_texture, pacman_texture, life_texture;
+Texture pacman_logo_texture, ready_text_texture, gameover_text_texture, start_text_texture, scoreboard_text_texture, newhighscore_text_texture, scoreboard_texture,  gameend_texture, showinput_texture, pacman_texture, life_texture;
 wstring cutscene_wav, intro_wav, pacman_move_wav, gameclear_wav, gamefail_wav, chomp_wav;
+
+MusicManager musicManager;
 
 enum GAME_STATE { INIT, PLAY, GAMEEND };
 GAME_STATE gs = INIT;
@@ -62,17 +64,18 @@ bool ShowingInput = false;
 bool ShowScoreBoard = false;
 string player_name = "";
 int player_score = 0;
+bool isnewhigh = false;
 
 vector<Score> get5Scores() {
-	ifstream scoretext("SCORE.txt");
+	ifstream scoretext("\SCORE.txt");
 	vector<Score> scores;
 	string name;
 	int score;
+
 	while (scoretext >> name >> score) {
 		scores.push_back({ name, score });
 	}
 	scoretext.close();
-
 	sort(scores.begin(), scores.end(), [](const Score& a, const Score& b) {
 		return a.score > b.score;
 		});
@@ -82,11 +85,24 @@ vector<Score> get5Scores() {
 }
 
 void savescore(const string& name, int score) {
-	ofstream savescore("SCORE.txt", ios::app);
+	ofstream savescore("\SCORE.txt", ios::app);
 	if (savescore.is_open()) {
 		savescore << name << " " << score << endl;
+
 	}
 	savescore.close();
+	auto scores = get5Scores();
+	if (scores.size() > 1 && score > scores[1].score) {
+		musicManager.playMusic("newhighscore"); // 최고 점수 음악 재생
+		isnewhigh = true;
+	}
+	else if (scores.size() == 1) {
+		musicManager.playMusic("newhighscore");
+		isnewhigh = true;
+	}
+	else {
+		isnewhigh = false;
+	}
 }
 
 void initializeMaterial(Material& mtl, const std::array<float, 4>& emission, const std::array<float, 4>& ambient, const std::array<float, 4>& diffuse, const std::array<float, 4>& specular, float shininess) {
@@ -209,10 +225,8 @@ void initialize() {
 	start_text_texture.initializeTexture("start_text.png");
 	gameover_text_texture.initializeTexture("gameover_text.png");
 	ready_text_texture.initializeTexture("ready_text.png");
-	yourscore_text_texture.initializeTexture("yourscore_text.png");
 	scoreboard_text_texture.initializeTexture("scoreboard_text.png");
 	newhighscore_text_texture.initializeTexture("newhighscore_text.png");
-	restart_text_texture.initializeTexture("restart_text.png");
 
 	pacman_texture.initializeTexture("pacman.png");
 	life_texture.initializeTexture("life.png");
@@ -221,21 +235,18 @@ void initialize() {
 	showinput_texture.initializeTexture("ShowInput.png");
 	init_pacman_ghost();
 
-	// 각 파일 이름 정의
-	string file1 = "cutscene.wav";
-	string file2 = "intro.wav";
-	string file3 = "pacman_move.wav";
-	string file4 = "gameclear.wav";
-	string file5 = "gamefail.wav";
-	string file6 = "chomp.wav";
-
-	// 각각의 std::wstring 변수에 값 저장
-	cutscene_wav = wstring(file1.begin(), file1.end());
-	intro_wav = wstring(file2.begin(), file2.end());
-	pacman_move_wav = wstring(file3.begin(), file3.end());
-	gameclear_wav = wstring(file4.begin(), file4.end());
-	gamefail_wav = wstring(file5.begin(), file5.end());
-	chomp_wav = wstring(file6.begin(), file6.end());
+	musicManager.initialize();
+	musicManager.loadMusic("chomp", "chomp.wav");
+	musicManager.loadMusic("cutscene", "cutscene.wav");
+	musicManager.loadMusic("dead", "dead.wav");
+	musicManager.loadMusic("gamefail", "gamefail.wav");
+	musicManager.loadMusic("gameclear", "gameclear.wav");
+	musicManager.loadMusic("intro", "intro.wav", true);
+	musicManager.loadMusic("eat_ghost", "pacman_eatghost.wav");
+	musicManager.loadMusic("pacman_move", "pacman_move.wav", true);
+	musicManager.loadMusic("powerup", "powerup.wav", true);
+	musicManager.loadMusic("gotoghostroom", "gotoghostroom.wav", true);
+	musicManager.loadMusic("newhighscore", "newhighscore.wav", true);
 }
 
 void updateDirectionOfPacMan(int targetX = 0, int targetY = 0) {
@@ -701,13 +712,24 @@ void updateGhostRoom(int dt) {
 		ghostroom.getGhost(i)->setVelocity(0.0f, +0.6f * MOVE_SPEED, 0.0f);
 
 	ghostroom.updatelocate();
+
+	int j = 0;
+	for (auto ghost : ghosts) {
+		if (ghost->getState() == Ghost::EATEN)
+			j++;
+	}
+	if (j == 0) {
+		musicManager.stopMusic("gotoghostroom");
+	}
 }
 
 GameTimer gameTimer;
 FrightenedTimer frightenedTimer;
 BlackshownTimer blackshownTimer;
+GhoststopTimer ghoststopTimer;
 int blinkingIntreval = frightenedTimer.getblinkingInterval();
 int blackshownTime = blackshownTimer.getblackshownTime();
+int ghoststopTime = ghoststopTimer.getghoststopTime();
 
 int th1 = blinkingIntreval;
 int th2 = 1000;
@@ -718,9 +740,18 @@ int th6 = 1200;
 int th7 = 1000;
 int th8 = 1200;
 int th9 = 200;
+int catchghost = 0;
 
 int responseTime = gameTimer.getresponseTime();
 int GTelapsedTime, FTelapsedTime, BTelapsedTime;
+
+bool isMusicPlaying = false;
+bool intro_done = false;  // 인트로 음악이 끝났는지 확인하는 변수
+bool frightened_start = false; //frightened 음악 이 끝났는지 확인하는 변수
+bool gameclear_start = false;
+bool gameend_start = false;
+bool gamefail_start = false;
+bool response_music_start = false;
 
 void resetGame() {
 	pacman.setCollided(false);
@@ -748,11 +779,12 @@ void resetGame() {
 	th2 = 1000;
 	th3 = 1200;
 	th4 = blackshownTime;
-	th5 = 1000;
+	th5 = 500;
 	th6 = 1200;
 	th7 = 1000;
 	th8 = 1200;
 	th9 = 200;
+	catchghost = 0;
 
 	ghostroom.initialize();
 	initializeGhost(blinky, 11, 13, blinkyMtl);
@@ -763,12 +795,12 @@ void resetGame() {
 
 	currState = Ghost::GHOSTSTATE::SCATTER;
 
-	std::atomic<bool> isMusicPlaying(false);  // 음악 상태 추적
-	bool intro_done = false;  // 인트로 음악이 끝났는지 확인하는 변수
-	bool frightened_start = false; //frightened 음악 이 끝났는지 확인하는 변수
-	bool gameclear_start = false;
-	bool gameend_start = false;
-	bool gamefail_start = false;
+	isMusicPlaying = false;  // 음악 상태 추적
+	intro_done = false;  // 인트로 음악이 끝났는지 확인하는 변수
+	frightened_start = false; //frightened 음악 이 끝났는지 확인하는 변수
+	gameclear_start = false;
+	gameend_start = false;
+	gamefail_start = false;
 }
 
 void renderBitmapString(float x, float y, void* font, const std::string& str) {
@@ -793,42 +825,49 @@ void idle() {
 			hasShownInput = false;
 
 			if (!isMusicPlaying) {
-				playBGM(intro_wav, true);  // 인트로음악 반복재생
+				musicManager.playMusic("intro");  // 인트로음악 반복재생
+				isMusicPlaying = true;
 			}
 			return;
 		}
 		else if (gs == PLAY) {
 			if (!intro_done) {
-				stopBGM();  // 인트로 음악 중지
+				musicManager.stopMusic("intro"); // 인트로 음악 중지
 				intro_done = true;  // intro_done을 true로 설정
 			}
 			if (frightenedTimer.getState() == Timer::STATE::FRIGHTENED) {
-
-				std::cout << "Frightened" << endl;
 				if (!frightened_start) {
 					frightened_start = true;
-					stopBGM();
-				} // 처음에만 음악 정지
-				playBGM(cutscene_wav, true);
+					musicManager.playMusic("powerup");
+				} 
 			}
-			else {
-				//frightened_start = false;
-				if (pacman.getCurrentDirection() == Sphere::NONE) stopBGM();
-				else playBGM(pacman_move_wav, true);
+			else if (frightenedTimer.getState() == Timer::STATE::NON_WORKING) {
+				if (frightened_start) {
+					frightened_start = false;
+					musicManager.stopMusic("powerup");
+					musicManager.playMusic("pacman_move");
+				}
 			}
 			//-------------------------------(gameTimer)-------------------------------
-			if (frightenedTimer.getState() == Timer::STATE::NON_WORKING) {
-				gameTimer.update(deltaTime);
+			if (ghoststopTimer.getState() != Timer::STATE::STOPPING) {
+				if (frightenedTimer.getState() == Timer::STATE::NON_WORKING) {
+					gameTimer.update(deltaTime);
+				}
+				else {
+					if (gameTimer.getState() == Timer::STATE::GAMECLEAR || gameTimer.getState() == Timer::STATE::GAMEOVER)
+						gameTimer.update(deltaTime);
+				}
 			}
 			else {
-				if (gameTimer.getState() == Timer::STATE::GAMECLEAR || gameTimer.getState() == Timer::STATE::GAMEOVER)
-					gameTimer.update(deltaTime);
+				ghoststopTimer.update(deltaTime);
+				bool isnotstop = ghoststopTimer.checkchange(Timer::CHANGING, ghoststopTime);
+				return;
 			}
 
 			// READY: 처음시작과 RESPONSE 이후 실행
 			if (gameTimer.getState() == Timer::STATE::READY) {
 
-				stopBGM();
+				//musicPlayer.stopBGM();
 				bool isplay = gameTimer.checkchange(Timer::SCATTER, gameTimer.getreadyTime());
 				if (!gameTimer.getReadyInitialized()) {
 					gameTimer.setReadyInitialized(true);
@@ -846,7 +885,11 @@ void idle() {
 						g->setAlpha(0.0f);
 					}
 				}
-				else if (GTelapsedTime > th3) {
+				else if (GTelapsedTime >= th3) {
+					if (response_music_start == false && (GTelapsedTime - th3)<=deltaTime) {
+						musicManager.playMusic("dead");
+						response_music_start == true;
+					}
 					pacman.setAlpha(1.0f - 1.5f * (float)((GTelapsedTime - th3) * (GTelapsedTime - th3)) / (float)((responseTime - th3) * (responseTime - th3)));
 				}
 				if (isready) {
@@ -873,12 +916,10 @@ void idle() {
 			}
 			// GAMEOVER
 			else if (gameTimer.getState() == Timer::STATE::GAMEOVER) {
-
 				if (!gamefail_start) {
 					gamefail_start = true;
-					stopBGM();
-				} // 처음에만 음악 정지
-				playBGM(gamefail_wav, false);
+					musicManager.playMusic("gamefail");
+				}
 				// SMOOTH하게 돌아가기
 				GTelapsedTime = gameTimer.getelapsedTime();
 				if (th5 < GTelapsedTime && GTelapsedTime < th6) {
@@ -902,6 +943,10 @@ void idle() {
 			}
 			// GAMECLEAR
 			else if (gameTimer.getState() == Timer::STATE::GAMECLEAR) {
+				if (!gameclear_start) {
+					gameclear_start = true;
+					musicManager.playMusic("gameclear");
+				}
 				// SMOOTH하게 돌아가기
 				GTelapsedTime = gameTimer.getelapsedTime();
 				if (th7 < GTelapsedTime && GTelapsedTime < th8) {
@@ -936,7 +981,8 @@ void idle() {
 			}
 			// PLAYING
 			// 상태 변경 check (Scatter <-> Chase)
-			else if (gameTimer.getState() == Timer::STATE::CHASE) {
+			if (gameTimer.getState() == Timer::STATE::CHASE) {
+				// musicManager.playMusic("pacman_move");
 				// CHASE에서 SCATTER로 넘어갔는가?
 				if (gameTimer.checkchange(Timer::SCATTER, gameTimer.getchaseTime())) {
 					currState = Ghost::GHOSTSTATE::SCATTER;
@@ -946,30 +992,21 @@ void idle() {
 							ghost->setState(currState);
 					}
 				}
-				else
-					//currState = Ghost::GHOSTSTATE::CHASE;
-
 				if (frightenedTimer.getState() != Timer::STATE::NON_WORKING)
 					frightenedTimer.update(deltaTime);
 			}
 			else if (gameTimer.getState() == Timer::STATE::SCATTER) {
-				// SCATTER에서 CHASE로 넘어갔는가?
+				musicManager.playMusic("pacman_move");
 				if (gameTimer.checkchange(Timer::CHASE, gameTimer.getscatterTime())) {
 					currState = Ghost::GHOSTSTATE::CHASE;
-					// cout << "변경 후: " << currState << '\n';
-					// 고스트 상태 변경(START) (Scatter <- Chase)
 					for (auto* ghost : ghosts) {
 						if (ghost->getState() == Ghost::GHOSTSTATE::SCATTER)
 							ghost->setState(currState);
 					}
 				}
-				else
-					// currState = Ghost::GHOSTSTATE::SCATTER;
-
 				if (frightenedTimer.getState() != Timer::STATE::NON_WORKING)
 					frightenedTimer.update(deltaTime);
 			}
-
 			// -------------------------------(gameTimer)-------------------------------
 
 			// ----------------------------(frightenedTimer)----------------------------
@@ -1043,69 +1080,96 @@ void idle() {
 					else if (ghost->getState() == Ghost::GHOSTSTATE::FRIGHTENEND) {
 						ghost->setAlpha(1.0f);
 					}
+					else if (ghost->getState() == Ghost::GHOSTSTATE::GHOSTROOM && ghost->getisInGhostroom() == true) {
+						ghost->setMTL(frightenedMtl);
+					}
 				}
 			}
 			map.setPoint_type(targetx, targety, Block::POINT_TYPE::NOPT);
 			// 큰 dot 먹었을 때(END)
 
+			if (ghoststopTimer.getState() != Timer::STATE::CHANGING) {
+				updatePacMan();
+				updateGhost();
+				updateGhostRoom(deltaTime);
+			}
 
-			updatePacMan();
-			updateGhost();
-			updateGhostRoom(deltaTime);
 
-
-			// 충돌 검사(START) - 한번에 여러명 충돌할 우연의 우연의 우연의... 까지 고려하려면 for문 써야할 듯
+			// 충돌 검사(START)
 			for (auto* ghost : ghosts) {
 				colHandler(pacman, *ghost);
-				if (!pacman.getCollided()) {
+				if (!(pacman.getCollided() && ghost->getCollided())) {
 					continue;
 				}
-				pacman.setCollided(false); // 충돌 초기화
-				switch (ghost->getState()) {
-				case Ghost::GHOSTSTATE::GHOSTROOM:
-				case Ghost::GHOSTSTATE::SCATTER:
-				case Ghost::GHOSTSTATE::CHASE: {
-					// RESPONSE 상태로 진입
-					// cout << pacman.getLife() << '\n';
-					if (pacman.getLife() == 0) {
-						gameTimer.initialize(Timer::STATE::GAMEOVER, 0);;
+				// ---- 충돌 발생 ----
+				if (ghoststopTimer.getState() == Timer::STATE::NON_WORKING) {
+					musicManager.stopMusic("pacman_move");
+					if (ghost->getState() != Ghost::GHOSTSTATE::FRIGHTENEND) {
+						musicManager.stopAllMusic();
 					}
-					else {
-						gameTimer.initialize(Timer::STATE::RESPONSE, 0);
+					ghoststopTimer.initialize(Timer::STATE::STOPPING, 0);
+					return;
+				}
+				else if (ghoststopTimer.getState() == Timer::STATE::CHANGING) {
+					//cout << "Now Changing" << ghost->getState() << endl;
+					// musicManager.stopMusic("pacman_move");
+					// musicManager.update();
+					pacman.setCollided(false); // 충돌 초기화
+					ghost->setCollided(false);
+					switch (ghost->getState()) {
+					case Ghost::GHOSTSTATE::GHOSTROOM:
+					case Ghost::GHOSTSTATE::SCATTER:
+					case Ghost::GHOSTSTATE::CHASE: {
+						// GAMEOVER or RESPONSE 상태로 진입
+						if (pacman.getLife() == 0) {
+							musicManager.stopAllMusic();
+							gameTimer.initialize(Timer::STATE::GAMEOVER, 0);;
+						}
+						else {
+							musicManager.stopAllMusic();
+							response_music_start = false;
+							gameTimer.initialize(Timer::STATE::RESPONSE, 0);
+						}
+						break;
 					}
-					break;
-				}
-				case Ghost::GHOSTSTATE::FRIGHTENEND: {
-					// ghost를 EATEN 상태로 변경
-					ghost->setState(Ghost::GHOSTSTATE::EATEN);
-					ghost->setChange_state(true);
-					ghost->setMTL(eatenMtl);
-					ghost->setAlpha(1.0f);
-				}
-					break;
-				default:
-					break;
+					case Ghost::GHOSTSTATE::FRIGHTENEND: {
+						// ghost를 EATEN 상태로 변경
+						ghost->setState(Ghost::GHOSTSTATE::EATEN);
+						ghost->setChange_state(true);
+						ghost->setMTL(eatenMtl);
+						ghost->setAlpha(1.0f);
+						catchghost++;
+						musicManager.playMusic("gotoghostroom");
+					}
+						break;
+					default:
+						break;
+					}
+					ghoststopTimer.initialize(Timer::NON_WORKING, 0);
 				}
 			}
 			//충돌검사(END);
 			if (map.isGameClear(clear_criteria)) {
-				stopBGM();
-				playBGM(gameclear_wav, false);
+				musicManager.stopAllMusic();
+				musicManager.playMusic("gameclear");
 				gameTimer.initialize(Timer::STATE::GAMECLEAR, 0);
 			}
 		}
 		else if (gs == GAMEEND) {
 			if (!gameend_start) {
-				// cout << "GameEnd" << endl;
-				stopBGM();
-				playBGM(intro_wav, true);
 				gameend_start = true;
+				intro_done = false;
 			}
 			if (!hasShownInput) {
 				ShowingInput = true;
 				hasShownInput = true; //처음 입력만 받도록
 			}
+			if (ShowingInput == false && ShowScoreBoard == false) {
+				musicManager.stopMusic("newhighscore");
+				musicManager.playMusic("cutscene");
+			}
 		}
+		musicManager.update();
 		glutPostRedisplay();
 	}
 }
@@ -1147,12 +1211,15 @@ void display() {
 		drawTexture(scoreboard_texture, 0, 0, BOUNDARY_X * 1.8f, scoreboard_texture.getAspectRatio());
 		// 상위 5개 점수 출력
 		vector<Score> scores = get5Scores();
-		float y = BOUNDARY_Y - 167;
+		float y = BOUNDARY_Y - 164;
 		for (const auto& score : scores) {
 			glColor3f(1.0f, 1.0f, 1.0f);
-			renderBitmapString(-BOUNDARY_X + 125, y, GLUT_BITMAP_HELVETICA_18, score.name);
-			renderBitmapString(-BOUNDARY_X + 220, y, GLUT_BITMAP_HELVETICA_18, to_string(score.score));
-			y -= 22;
+			renderBitmapString(-BOUNDARY_X + 185, y, GLUT_BITMAP_HELVETICA_18, score.name);
+			renderBitmapString(-BOUNDARY_X + 256, y, GLUT_BITMAP_HELVETICA_18, to_string(score.score));
+			y -= 25;
+		}
+		if (isnewhigh) {
+			drawTexture(newhighscore_text_texture, 0, +BOUNDARY_Y / 1.4f, BOUNDARY_X / 1.5f, newhighscore_text_texture.getAspectRatio());
 		}
 	}
 	if (gs == GAMEEND && ShowingInput) {
@@ -1169,16 +1236,20 @@ void display() {
 	// life and score
 	if (gs == PLAY) {
 		//draw life
-		drawTexture(life_texture, -BOUNDARY_X + 20, -BOUNDARY_Y + 20, BOUNDARY_X / 5.0f, life_texture.getAspectRatio());
+		drawTexture(life_texture, -BOUNDARY_X + 40, -BOUNDARY_Y + 21, BOUNDARY_X / 4.0f, life_texture.getAspectRatio());
 		for (int i = 0; i < pacman.getLife() - 1; ++i) {
-			drawTexture(pacman_texture, -BOUNDARY_X + 50 + i * 20, -BOUNDARY_Y + 20, BOUNDARY_X / 10.0f, pacman_texture.getAspectRatio());
+			drawTexture(pacman_texture, -BOUNDARY_X + 80 + i * 20, -BOUNDARY_Y + 20, BOUNDARY_X / 10.0f, pacman_texture.getAspectRatio());
 		}
 		//display score
 		int prev_score = player_score;
-		player_score = -map.getScore() + 2410;
-		if (prev_score < player_score) {
-			playBGM(chomp_wav, false, true);
-		}
+		if (gameTimer.getState() != Timer::STATE::GAMECLEAR) {
+			player_score = -map.getScore() + 2410 + 50 * (catchghost) * (catchghost + 1)/2;
+			if (prev_score < player_score) {
+				if (player_score != 0) {
+					musicManager.playMusic("chomp", true);
+				}
+			}
+		}		
 		if (player_score >= 0) {
 			glColor3f(1.0f, 1.0f, 1.0f);
 			renderBitmapString(-40, BOUNDARY_Y - 20, GLUT_BITMAP_TIMES_ROMAN_24, "Score: " + to_string(player_score));
@@ -1225,7 +1296,7 @@ void display() {
 }
 
 void keyboardDown(unsigned char key, int x, int y) {
-	if (tolower(key) == ' ' && gs == INIT) {
+	if (tolower(key) == ' ' && gs == INIT && ShowScoreBoard == false) {
 		gs = PLAY;
 		map.setState(Map::MAP_STATE::ST1);
 		map.createMap();
@@ -1238,13 +1309,16 @@ void keyboardDown(unsigned char key, int x, int y) {
 		gameTimer.setReadyInitialized(false);
 
 	}
-	else if (tolower(key) == 'r' && gs == GAMEEND && ShowingInput == false) {
+	else if (tolower(key) == 'r' && gs == GAMEEND && ShowingInput == false && ShowScoreBoard == false) {
+		musicManager.stopAllMusic();
 		gs = INIT;
 		map.setState(Map::MAP_STATE::INIT);
 		map.createMap();
 		init_pacman_ghost();
+		isnewhigh = false;
 	}
 	else if (key == 27) { // ESC
+		musicManager.cleanup();
 		exit(0);
 	}
 	if (gs == INIT || gs == GAMEEND) {

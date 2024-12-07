@@ -1,40 +1,103 @@
 #include "Music.h"
 #include <iostream>
-using namespace std;
-void playBGM(const std::wstring& wfile, bool loop, bool overlap) {
-    if (!overlap && isMusicPlaying) {
-        //cout << 2 << '\n';
-        return;  // 이미 음악이 재생 중이면 새로 시작하지 않음
-    }
-  
-    // SND_ASYNC로 비동기 재생, loop가 true이면 SND_LOOP를 추가하여 반복 재생
-    DWORD flags = SND_FILENAME | SND_ASYNC;
-    if (loop) {
-        flags |= SND_LOOP;  // 반복 재생
-    }
 
-    // 음악 재생
-    PlaySound(wfile.c_str(), NULL, flags);
+MusicManager::MusicManager() : system(nullptr) {}
 
-    // 음악 재생 상태를 true로 설정
-    isMusicPlaying = true;
+MusicManager::~MusicManager() {
+    cleanup();
 }
 
-void stopBGM() {
-    PlaySound(NULL, 0, 0);  // 음악 정지
-    isMusicPlaying = false;  // 음악 재생 상태를 false로 설정
+void MusicManager::initialize() {
+    FMOD::System_Create(&system);
+    if (system->init(512, FMOD_INIT_NORMAL, 0) != FMOD_OK) {
+        std::cerr << "FMOD initialization failed!" << std::endl;
+    }
 }
 
-void playBGMWithCallback(const std::wstring& wfile, int durationMs, std::function<void()> onFinished) {
-    // 비동기 음악 재생
-    playBGM(wfile, false, false);
+void MusicManager::loadMusic(const std::string& name, const std::string& filepath, bool loop) {
+    FMOD::Sound* sound = nullptr;
+    FMOD_MODE mode = loop ? FMOD_LOOP_NORMAL : FMOD_CREATECOMPRESSEDSAMPLE; // 압축된 샘플로 로드
+    if (system->createSound(filepath.c_str(), mode, nullptr, &sound) != FMOD_OK) {
+        std::cerr << "Failed to load music: " << filepath << std::endl;
+        return;
+    }
+    sounds[name] = sound;
+}
 
-    // 스레드로 재생 시간만큼 기다린 후 콜백 호출
-    std::thread([durationMs, onFinished]() {
-        std::this_thread::sleep_for(std::chrono::milliseconds(durationMs));
-        isMusicPlaying = false;  // 재생 완료로 간주
-        if (onFinished) {
-            onFinished();  // 콜백 호출
+void MusicManager::playMusic(const std::string& name, bool restart) {
+    if (sounds.find(name) == sounds.end()) {
+        std::cerr << "Music not found: " << name << std::endl;
+        return;
+    }
+
+    FMOD::Channel* channel = nullptr;
+
+    // 기존 채널 재사용
+    if (channels.find(name) != channels.end()) {
+        channel = channels[name];
+        bool isPlaying = false;
+        channel->isPlaying(&isPlaying);
+
+        // 이미 재생 중이고 restart가 false라면 종료
+        if (isPlaying) {
+            return;
         }
-        }).detach();  // 메인 루프와 독립적으로 실행
+    }
+
+    // 새로운 채널에 재생
+    if (system->playSound(sounds[name], nullptr, false, &channel) != FMOD_OK) {
+        std::cerr << "Failed to play music: " << name << std::endl;
+        return;
+    }
+
+    channels[name] = channel; // 채널 저장
 }
+
+
+void MusicManager::stopMusic(const std::string& name) {
+    if (channels.find(name) == channels.end()) {
+        return;
+    }
+    channels[name]->stop();
+}
+
+void MusicManager::setVolume(const std::string& name, float volume) {
+    if (channels.find(name) == channels.end()) {
+        std::cerr << "Channel not found for music: " << name << std::endl;
+        return;
+    }
+    channels[name]->setVolume(volume);
+}
+
+void MusicManager::update() {
+    if (system) {
+        system->update();
+    }
+}
+
+void MusicManager::cleanup() {
+    for (auto& elem : sounds) {
+        if (elem.second) {
+            elem.second->release();
+        }
+    }
+    sounds.clear();
+
+    if (system) {
+        system->close();
+        system->release();
+    }
+}
+
+void MusicManager::stopAllMusic() {
+    for (auto& channel : channels) {
+        if (channel.second) { // 채널이 유효한지 확인
+            bool isPlaying = false;
+            channel.second->isPlaying(&isPlaying); // 현재 재생 중인지 확인
+            if (isPlaying) {
+                channel.second->stop(); // 재생 중이면 중지
+            }
+        }
+    }
+}
+
