@@ -35,14 +35,6 @@ void CollisionHandler::operator()(PacMan& pacman, Ghost& ghost) {
                     pacman.setLife(pacman.getLife() - 1);
                 }
             }
-            else if (ghoststopTimer.getState() == Timer::CHANGING) {
-                //cout << "middle" << endl;
-                if (ghost.getState() != Ghost::GHOSTSTATE::FRIGHTENEND) {
-                    // Pac-Man 사망 효과음 재생
-                    // cout << "plus" << endl;
-                    // pacman.setLife(pacman.getLife() - 1);
-                }
-            }
         }
     }
 }

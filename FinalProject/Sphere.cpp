@@ -8,10 +8,12 @@ using namespace std;
 
 //6번 수정
 Sphere::Sphere() : radius(0.0f), slice(0), stack(0), alpha(1.0f), idxPos{ 0, 0 }, bInxPosUpdated(true),
-currDirection(NONE), nextDirection(NONE), bCollided(false) {}
+currDirection(NONE), nextDirection(NONE), bCollided(false) {
+}
 Sphere::Sphere(float r, int sl, int st, bool bCol)
 	: radius(r), slice(sl), stack(st), alpha(1.0f), idxPos{ 0, 0 }, bInxPosUpdated(true),
-	currDirection(NONE), nextDirection(NONE), bCollided(false) {}
+	currDirection(NONE), nextDirection(NONE), bCollided(false) {
+}
 //
 void Sphere::setRadius(float r) {
 	radius = r;
@@ -161,7 +163,8 @@ bool Sphere::getCollided() {
 
 //10번 수정
 PacMan::PacMan(float r, int sl, int st)
-	: Sphere(r, sl, st, false), life(1) {}
+	: Sphere(r, sl, st, false), life(1) {
+}
 //
 
 void PacMan::draw() const {
@@ -194,10 +197,11 @@ int PacMan::getLife() {
 }
 
 //11번 수정
-Ghost::Ghost(): state(Ghost::GHOSTSTATE::SCATTER), name(Ghost::GHOSTNAME::NONE), isChange_state(false), isInGhostroom(false) {}
+Ghost::Ghost() : state(Ghost::GHOSTSTATE::SCATTER), name(Ghost::GHOSTNAME::NONE), isChange_state(false), isInGhostroom(false) {}
 
 Ghost::Ghost(float r, int sl, int st, Ghost::GHOSTSTATE s, Ghost::GHOSTNAME n)
-	: Sphere(r, sl, st, false), state(s), name(n), isChange_state(false), isInGhostroom(false) {}
+	: Sphere(r, sl, st, false), state(s), name(n), isChange_state(false), isInGhostroom(false) {
+}
 //
 
 void Ghost::setState(Ghost::GHOSTSTATE s) {
@@ -223,7 +227,7 @@ Ghost::GHOSTNAME Ghost::getGhostname() const {
 }
 
 //13번 수정
-bool Ghost::getChange_state() const{
+bool Ghost::getChange_state() const {
 	return isChange_state;
 }
 

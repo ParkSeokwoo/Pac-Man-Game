@@ -24,8 +24,8 @@ using namespace std;
 const int FPS = 60;
 int sTime = 0;
 int eTime = 0;
-int life_base = 2;
-int clear_criteria = 180; // 초기에 241개
+int life_base = 3;
+int clear_criteria = 1; // 초기에 241개
 bool hasShownInput = false;
 
 Light light((float)BOUNDARY_X, (float)BOUNDARY_Y, (float)BOUNDARY_X / 2.0f, GL_LIGHT0);
@@ -35,20 +35,50 @@ Ghost blinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::BLINKY);
 Ghost pinky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::PINKY);
 Ghost inky(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::INKY);
 Ghost clyde(BLOCK_SIZE / 2.0f, 20, 20, Ghost::SCATTER, Ghost::CLYDE);
-vector<Ghost *> ghosts = { &blinky, &pinky, &inky, &clyde };
+vector<Ghost*> ghosts = { &blinky, &pinky, &inky, &clyde };
 
 Map map;
 GhostRoom ghostroom;
 CollisionHandler colHandler;
 Material pacmanMtl, blinkyMtl, pinkyMtl, inkyMtl, clydeMtl, eatenMtl, frightenedMtl;
 Ghost::GHOSTSTATE currState;
-Texture pacman_logo_texture, ready_text_texture, gameover_text_texture, start_text_texture, scoreboard_text_texture, newhighscore_text_texture, scoreboard_texture,  gameend_texture, showinput_texture, pacman_texture, life_texture;
+Texture pacman_logo_texture, ready_text_texture, gameover_text_texture, start_text_texture, scoreboard_text_texture, newhighscore_text_texture, scoreboard_texture, gameend_texture, showinput_texture, pacman_texture, life_texture;
 wstring cutscene_wav, intro_wav, pacman_move_wav, gameclear_wav, gamefail_wav, chomp_wav;
 
 MusicManager musicManager;
 
 enum GAME_STATE { INIT, PLAY, GAMEEND };
 GAME_STATE gs = INIT;
+
+GameTimer gameTimer;
+FrightenedTimer frightenedTimer;
+BlackshownTimer blackshownTimer;
+GhoststopTimer ghoststopTimer;
+int blinkingIntreval = frightenedTimer.getblinkingInterval();
+int blackshownTime = blackshownTimer.getblackshownTime();
+int ghoststopTime = ghoststopTimer.getghoststopTime();
+
+int th1 = blinkingIntreval;
+int th2 = 1000;
+int th3 = 1200;
+int th4 = blackshownTime;
+int th5 = 1000;
+int th6 = 1200;
+int th7 = 1000;
+int th8 = 1200;
+int th9 = 200;
+int catchghost = 0;
+
+int responseTime = gameTimer.getresponseTime();
+int GTelapsedTime, FTelapsedTime, BTelapsedTime;
+
+bool isMusicPlaying = false;
+bool intro_done = false;  // 인트로 음악이 끝났는지 확인하는 변수
+bool frightened_start = false; //frightened 음악 이 끝났는지 확인하는 변수
+bool gameclear_start = false;
+bool gameend_start = false;
+bool gamefail_start = false;
+bool response_music_start = false;
 
 //score related..
 ostringstream oss;
@@ -114,9 +144,9 @@ void initializeMaterial(Material& mtl, const std::array<float, 4>& emission, con
 }
 
 void initializeGhost(Ghost& ghost, int x, int y, Material& mtl, int i = -1) {
-    ghost.setIndexPosition(x, y);
-    ghost.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
-    ghost.setMTL(mtl);
+	ghost.setIndexPosition(x, y);
+	ghost.setVelocity(Vector3f(0.0f, 0.0f, 0.0f));
+	ghost.setMTL(mtl);
 
 	if (i == 0) {
 		ghost.setState(Ghost::GHOSTROOM);
@@ -164,14 +194,14 @@ void init_pacman_ghost() {
 }
 
 void initialize() {
-    // Light Initialization
-    light.setAmbient(0.5f, 0.5f, 0.5f, 1.0f);
-    light.setDiffuse(0.7f, 0.7f, 0.7f, 1.0f);
-    light.setSpecular(1.0f, 1.0f, 1.0f, 1.0f);
+	// Light Initialization
+	light.setAmbient(0.5f, 0.5f, 0.5f, 1.0f);
+	light.setDiffuse(0.7f, 0.7f, 0.7f, 1.0f);
+	light.setSpecular(1.0f, 1.0f, 1.0f, 1.0f);
 
-    // Materials Initialization
+	// Materials Initialization
 	std::array<float, 4> emission = { 0.2f, 0.2f, 0.2f, 1.0f };
-    float shininess = 30.0f;
+	float shininess = 30.0f;
 
 	initializeMaterial(pacmanMtl, emission,
 		{ 0.6f, 0.6f, 0.0f, 1.0f },
@@ -207,18 +237,18 @@ void initialize() {
 	initializeMaterial(eatenMtl, emission,
 		{ 0.8f, 0.8f, 0.8f, 1.0f },
 		{ 1.0f, 1.0f, 1.0f, 1.0f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f }, 
+		{ 1.0f, 1.0f, 1.0f, 1.0f },
 		shininess);
 
 	// Frightened Material (Blue)
 	initializeMaterial(frightenedMtl, emission,
-		{ 0.0f, 0.0f, 0.6f, 1.0f }, 
-		{ 0.0f, 0.0f, 0.8f, 1.0f }, 
-		{ 0.0f, 0.0f, 1.0f, 1.0f }, 
+		{ 0.0f, 0.0f, 0.6f, 1.0f },
+		{ 0.0f, 0.0f, 0.8f, 1.0f },
+		{ 0.0f, 0.0f, 1.0f, 1.0f },
 		shininess);
 
-    // Map Initialization
-    map.createMap();
+	// Map Initialization
+	map.createMap();
 
 	// Texture Initialization
 	pacman_logo_texture.initializeTexture("pacman_logo.png");
@@ -262,7 +292,7 @@ void updateDirectionOfPacMan(int targetX = 0, int targetY = 0) {
 	else if (idx[0] == 14 && idx[1] == 27) {
 		rIdx[1] = 0;// right
 	}
-	
+
 	const Block& lBlock = map.getBlock(lIdx[0], lIdx[1]);// left
 	const Block& tBlock = map.getBlock(tIdx[0], tIdx[1]);// top
 	const Block& rBlock = map.getBlock(rIdx[0], rIdx[1]);// right
@@ -290,7 +320,7 @@ void updateDirectionOfPacMan(int targetX = 0, int targetY = 0) {
 	default:
 		reverseDir = Sphere::NONE;
 		break;
-		}
+	}
 	if (gs == INIT) {
 
 		float minIdxDist = (float)INT_MAX;
@@ -543,7 +573,9 @@ void updatePacMan() {
 		updateDirectionOfPacMan();
 		colHandler(pacman, map);
 	}
-	pacman.move();
+	if (ghoststopTimer.getState() == Timer::NON_WORKING) {
+		pacman.move();
+	}
 }
 
 void updateGhost() {
@@ -565,7 +597,7 @@ void updateGhost() {
 			if (ghost->getisInGhostroom() == false) {
 				ghostroom.moveGhostToRoom(*ghost, currState);
 			}
-			else if (ghost->getisInGhostroom() == true && (ghost->getVelocity()[0] != 0.0f || ghost->getVelocity()[1] != 0.0f)){
+			else if (ghost->getisInGhostroom() == true && (ghost->getVelocity()[0] != 0.0f || ghost->getVelocity()[1] != 0.0f)) {
 				ghostroom.moveGhostToMap(*ghost, currState);
 			}
 		}
@@ -691,12 +723,11 @@ void updateGhost() {
 			default:
 				break;
 			}
-			ghost->move();
+			if (ghoststopTimer.getState() == Timer::NON_WORKING) {
+				ghost->move();
+			}
 		}
-			
 	}
-
-
 }
 
 void updateGhostRoom(int dt) {
@@ -722,36 +753,6 @@ void updateGhostRoom(int dt) {
 		musicManager.stopMusic("gotoghostroom");
 	}
 }
-
-GameTimer gameTimer;
-FrightenedTimer frightenedTimer;
-BlackshownTimer blackshownTimer;
-GhoststopTimer ghoststopTimer;
-int blinkingIntreval = frightenedTimer.getblinkingInterval();
-int blackshownTime = blackshownTimer.getblackshownTime();
-int ghoststopTime = ghoststopTimer.getghoststopTime();
-
-int th1 = blinkingIntreval;
-int th2 = 1000;
-int th3 = 1200;
-int th4 = blackshownTime;
-int th5 = 1000;
-int th6 = 1200;
-int th7 = 1000;
-int th8 = 1200;
-int th9 = 200;
-int catchghost = 0;
-
-int responseTime = gameTimer.getresponseTime();
-int GTelapsedTime, FTelapsedTime, BTelapsedTime;
-
-bool isMusicPlaying = false;
-bool intro_done = false;  // 인트로 음악이 끝났는지 확인하는 변수
-bool frightened_start = false; //frightened 음악 이 끝났는지 확인하는 변수
-bool gameclear_start = false;
-bool gameend_start = false;
-bool gamefail_start = false;
-bool response_music_start = false;
 
 void resetGame() {
 	pacman.setCollided(false);
@@ -839,7 +840,7 @@ void idle() {
 				if (!frightened_start) {
 					frightened_start = true;
 					musicManager.playMusic("powerup");
-				} 
+				}
 			}
 			else if (frightenedTimer.getState() == Timer::STATE::NON_WORKING) {
 				if (frightened_start) {
@@ -886,7 +887,7 @@ void idle() {
 					}
 				}
 				else if (GTelapsedTime >= th3) {
-					if (response_music_start == false && (GTelapsedTime - th3)<=deltaTime) {
+					if (response_music_start == false && (GTelapsedTime - th3) <= deltaTime) {
 						musicManager.playMusic("dead");
 						response_music_start == true;
 					}
@@ -958,7 +959,7 @@ void idle() {
 					if (GTelapsedTime - th6 > th9) {
 						th9 += 200;
 						float r = (map.getBox_Color(0, 0)[0] == 0.0f) ? 1.0f : 0.0f; float g = (map.getBox_Color(0, 0)[0] == 0.0f) ? 1.0f : 0.0f;	float b = (map.getBox_Color(0, 0)[0] == 0.0f) ? 1.0f : 1.0f;
-						for (int i = 0; i < NUM_ROW; ++i) { 
+						for (int i = 0; i < NUM_ROW; ++i) {
 							for (int j = 0; j < NUM_COL; ++j) {
 								map.setPoint_type(i, j, Block::POINT_TYPE::NOPT);
 								if (map.getBlock(i, j).isPassable() == false) {
@@ -1088,7 +1089,7 @@ void idle() {
 			map.setPoint_type(targetx, targety, Block::POINT_TYPE::NOPT);
 			// 큰 dot 먹었을 때(END)
 
-			if (ghoststopTimer.getState() != Timer::STATE::CHANGING) {
+			if (ghoststopTimer.getState() == Timer::STATE::NON_WORKING) {
 				updatePacMan();
 				updateGhost();
 				updateGhostRoom(deltaTime);
@@ -1106,6 +1107,14 @@ void idle() {
 					musicManager.stopMusic("pacman_move");
 					if (ghost->getState() != Ghost::GHOSTSTATE::FRIGHTENEND) {
 						musicManager.stopAllMusic();
+						for (auto* ghost : ghosts) {
+							ghost->setVelocity(0.0f, 0.0f, 0.0f);
+							ghost->setCurrentDirection(Sphere::NONE);
+							ghost->setNextDirection(Sphere::NONE);
+						}
+						pacman.setVelocity(0.0f, 0.0f, 0.0f);
+						pacman.setCurrentDirection(Sphere::NONE);
+						pacman.setNextDirection(Sphere::NONE);
 					}
 					ghoststopTimer.initialize(Timer::STATE::STOPPING, 0);
 					return;
@@ -1133,7 +1142,7 @@ void idle() {
 						break;
 					}
 					case Ghost::GHOSTSTATE::FRIGHTENEND: {
-						// ghost를 EATEN 상태로 변경
+						// ghost를 EATEN 상태로 변경z
 						ghost->setState(Ghost::GHOSTSTATE::EATEN);
 						ghost->setChange_state(true);
 						ghost->setMTL(eatenMtl);
@@ -1141,7 +1150,7 @@ void idle() {
 						catchghost++;
 						musicManager.playMusic("gotoghostroom");
 					}
-						break;
+													   break;
 					default:
 						break;
 					}
@@ -1181,10 +1190,10 @@ void drawTexture(const Texture& texture, float x, float y, float width, float r)
 	glBindTexture(GL_TEXTURE_2D, texture.getTextureId());
 
 	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f); glVertex2f(x - width / 2, y - height /2);
-	glTexCoord2f(0.0f, 1.0f); glVertex2f(x - width / 2, y + height / 2);     
-	glTexCoord2f(1.0f, 1.0f); glVertex2f(x + width / 2, y + height / 2); 
-	glTexCoord2f(1.0f, 0.0f); glVertex2f(x + width / 2, y - height / 2);    
+	glTexCoord2f(0.0f, 0.0f); glVertex2f(x - width / 2, y - height / 2);
+	glTexCoord2f(0.0f, 1.0f); glVertex2f(x - width / 2, y + height / 2);
+	glTexCoord2f(1.0f, 1.0f); glVertex2f(x + width / 2, y + height / 2);
+	glTexCoord2f(1.0f, 0.0f); glVertex2f(x + width / 2, y - height / 2);
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);
@@ -1203,7 +1212,7 @@ void display() {
 
 	// Draw texture
 	if (gs == INIT) {
-		drawTexture(pacman_logo_texture, 0, +BOUNDARY_Y / 1.5f, BOUNDARY_X * 1.6f, 0.9f *pacman_logo_texture.getAspectRatio());
+		drawTexture(pacman_logo_texture, 0, +BOUNDARY_Y / 1.5f, BOUNDARY_X * 1.6f, 0.9f * pacman_logo_texture.getAspectRatio());
 		drawTexture(start_text_texture, 0, -BOUNDARY_Y / 1.7f, BOUNDARY_X * 1.5f, start_text_texture.getAspectRatio());
 		drawTexture(scoreboard_text_texture, 0, -BOUNDARY_Y / 1.24f, BOUNDARY_X * 0.4f, scoreboard_text_texture.getAspectRatio());
 	}
@@ -1243,13 +1252,13 @@ void display() {
 		//display score
 		int prev_score = player_score;
 		if (gameTimer.getState() != Timer::STATE::GAMECLEAR) {
-			player_score = -map.getScore() + 2410 + 50 * (catchghost) * (catchghost + 1)/2;
+			player_score = -map.getScore() + 2410 + 50 * (catchghost) * (catchghost + 1) / 2;
 			if (prev_score < player_score) {
 				if (player_score != 0) {
 					musicManager.playMusic("chomp", true);
 				}
 			}
-		}		
+		}
 		if (player_score >= 0) {
 			glColor3f(1.0f, 1.0f, 1.0f);
 			renderBitmapString(-40, BOUNDARY_Y - 20, GLUT_BITMAP_TIMES_ROMAN_24, "Score: " + to_string(player_score));

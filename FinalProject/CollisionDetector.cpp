@@ -34,8 +34,7 @@ bool CollisionDetector::operator()(const PacMan& pacman, const Map& map) {
 bool CollisionDetector::operator()(const PacMan& pacman, const Ghost& ghost) {
 	Vector3f PIndex = pacman.getCenter();
 	Vector3f GIndex = ghost.getCenter();
-
-	if ((PIndex[0] - GIndex[0]) * (PIndex[0] - GIndex[0]) + (PIndex[1] - GIndex[1]) * (PIndex[1] - GIndex[1]) <= (pacman.getRadius() + ghost.getRadius()) * pacman.getRadius() + ghost.getRadius())
+	if (((PIndex[0] - GIndex[0]) * (PIndex[0] - GIndex[0]) + (PIndex[1] - GIndex[1]) * (PIndex[1] - GIndex[1]) <= (pacman.getRadius() + ghost.getRadius()) * (pacman.getRadius() + ghost.getRadius())) && !(ghost.getState() == Ghost::GHOSTROOM))
 		return true;
 	else
 		return false;
