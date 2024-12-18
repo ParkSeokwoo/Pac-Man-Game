@@ -14,3 +14,6 @@
 
 ## Game End Screen
 <img src="https://github.com/user-attachments/assets/80dc031e-a637-4bdb-b4a8-53ce9f35764b" width="400" />
+
+# Contributors
+박석우, 우승연
