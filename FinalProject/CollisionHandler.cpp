@@ -23,9 +23,7 @@ void CollisionHandler::operator()(PacMan& pacman, Ghost& ghost) {
     CollisionDetector colDetector;
     if (ghost.getState() != Ghost::GHOSTSTATE::EATEN) {
         if (colDetector(pacman, ghost)) {
-            //cout << "minus" << endl;
             if (ghoststopTimer.getState() == Timer::NON_WORKING) {
-                //cout << "why" << endl;
                 pacman.setCollided(true);
                 ghost.setCollided(true);
                 if (ghost.getState() == Ghost::FRIGHTENEND) {

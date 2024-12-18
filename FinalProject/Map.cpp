@@ -78,12 +78,12 @@ Block::POINT_TYPE Block::getPoint_type() const {
 
 void drawQuarterCircle(float width, float height, int segments) {
 	glBegin(GL_LINE_STRIP);
-	for (int i = 0; i <= segments; ++i) {
-		float theta = (M_PI / 2.0f) * float(i) / float(segments);
-		float x = width * cos(theta);
-		float y = height * sin(theta);
-		glVertex3f(x, y, 0.0);
-	}
+		for (int i = 0; i <= segments; ++i) {
+			float theta = (M_PI / 2.0f) * float(i) / float(segments);
+			float x = width * cos(theta);
+			float y = height * sin(theta);
+			glVertex3f(x, y, 0.0);
+		}
 	glEnd();
 }
 
@@ -102,18 +102,18 @@ void Block::draw() const {
 			glTranslatef(-width / 2, -height / 2, 0.0f);
 
 			drawQuarterCircle(width, width, 20);
-			drawQuarterCircle(width / 2, width / 2, 10);
+			drawQuarterCircle(width/2, width/2, 10);
 
 			glPopMatrix();
 			break;
 		}
 		case BOX_TYPE::ST2: {
 			glBegin(GL_LINES);
-			glVertex3f(-width / 2, -height / 2, 0.0f);
-			glVertex3f(-width / 2, height / 2, 0.0f);
+				glVertex3f(-width / 2, -height / 2, 0.0f); 
+				glVertex3f(-width / 2, height / 2, 0.0f); 
 
-			glVertex3f(0.0f, -height / 2, 0.0f);
-			glVertex3f(0.0f, height / 2, 0.0f);
+				glVertex3f(0.0f, -height / 2, 0.0f);
+				glVertex3f(0.0f, height / 2, 0.0f);
 			glEnd();
 			break;
 		}
@@ -137,8 +137,8 @@ void Block::draw() const {
 			glPopMatrix();
 
 			glBegin(GL_LINES);
-			glVertex3f(width / 2, -height / 2, 0.0f);
-			glVertex3f(width / 2, height / 2, 0.0f);
+				glVertex3f(width / 2, -height / 2, 0.0f);
+				glVertex3f(width / 2, height / 2, 0.0f);
 			glEnd();
 			break;
 		}
@@ -152,26 +152,26 @@ void Block::draw() const {
 			glPopMatrix();
 
 			glBegin(GL_LINES);
-			glVertex3f(-width / 2, height / 2, 0.0f);
-			glVertex3f(width / 2, height / 2, 0.0f);
+				glVertex3f(-width / 2, height / 2, 0.0f);
+				glVertex3f(width / 2, height / 2, 0.0f);
 			glEnd();
 			break;
 			break;
 		}
 		case BOX_TYPE::ST6: {
 			glBegin(GL_LINES);
-			glVertex3f(0.0f, -height / 2, 0.0f);
-			glVertex3f(0.0f, height / 2, 0.0f);
+				glVertex3f(0.0f, -height / 2, 0.0f);
+				glVertex3f(0.0f, height / 2, 0.0f);
 			glEnd();
 			break;
 		}
 		case BOX_TYPE::ST7: {
 			glBegin(GL_LINES);
-			glVertex3f(0.0f, -height / 2, 0.0f);
-			glVertex3f(0.0f, 0.0f, 0.0f);
+				glVertex3f(0.0f, -height / 2, 0.0f);
+				glVertex3f(0.0f, 0.0f, 0.0f);
 
-			glVertex3f(0.0f, 0.0f, 0.0f);
-			glVertex3f(-width / 2, 0.0f, 0.0f);
+				glVertex3f(0.0f, 0.0f, 0.0f);
+				glVertex3f(-width / 2, 0.0f, 0.0f);
 			glEnd();
 			break;
 		}
@@ -179,8 +179,8 @@ void Block::draw() const {
 			glPushMatrix();
 			glBegin(GL_QUADS);
 			glColor3f(1.0f, 0.8f, 0.9f);
-			glVertex3f(-width / 2, -height / 2, 0.0f);
-			glVertex3f(-width / 2, height / 2, 0.0f);
+			glVertex3f(-width / 2, -height / 2, 0.0f); 
+			glVertex3f(-width / 2, height / 2, 0.0f);  
 			glVertex3f(-width / 8, height / 2, 0.0f);
 			glVertex3f(-width / 8, -height / 2, 0.0f);
 			glEnd();
@@ -226,12 +226,12 @@ void Block::draw() const {
 		if (bPoint == POINT_TYPE::SMALL) {
 			radius = width / 8;
 			numSegments = 20;
-		}
+		}			
 		else if (bPoint == POINT_TYPE::BIG) {
 			radius = width / 2.5f;
 			numSegments = 50;
 		}
-		//
+	//
 		glPushMatrix();
 
 		glTranslatef(center[0], center[1], center[2]);
@@ -270,15 +270,15 @@ void Map::createMap() {
 		}
 		int xNopt[] = {
 			9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-			9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+			9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 
 			21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
 			10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
 		};
 		int yNopt[] = {
-			5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+			5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,            
+			5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 
 			5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-			5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-			22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22
+			22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22             
 		};
 
 		for (int i = 0; i < sizeof(xNopt) / sizeof(xNopt[0]); ++i) {
@@ -313,7 +313,7 @@ void Map::createMap() {
 
 		blocks[14][0].setPassable(true);
 		blocks[14][27].setPassable(true);
-		int xNopt[] = {
+		int xNopt[] = { 
 			14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
 			11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
 			17, 17, 17, 17, 17, 17, 17, 17, 17, 17,
@@ -326,9 +326,9 @@ void Map::createMap() {
 			9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
 			9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
 			12, 12, 15, 15,
-			9, 9, 9, 9, 9, 9,
+			9, 9, 9, 9, 9, 9, 
 			18, 18, 18, 18, 18, 18
-
+		
 		};
 		for (int i = 0; i < sizeof(xNopt) / sizeof(xNopt[0]); ++i) {
 			int x = xNopt[i];
@@ -339,13 +339,13 @@ void Map::createMap() {
 		blocks[3][26].setPoint(Block::POINT_TYPE::BIG);
 		blocks[23][1].setPoint(Block::POINT_TYPE::BIG);
 		blocks[23][26].setPoint(Block::POINT_TYPE::BIG);
-
+		
 		blocks[12][13].setBoxType(Block::BOX_TYPE::ST8);
 		blocks[12][14].setBoxType(Block::BOX_TYPE::ST8);
 		blocks[12][12].setBoxType(Block::BOX_TYPE::ST9);
 		blocks[12][15].setBoxType(Block::BOX_TYPE::ST10);
 		file.close();
-
+		
 		float x = LEFT_BOUNDARY;
 		float y = TOP_BOUNDARY;
 		for (int i = 0; i < blocks.size(); i++) {
@@ -425,7 +425,6 @@ bool Map::isGameClear(int v) {
 			return block.getPoint_type() == Block::POINT_TYPE::SMALL;
 			});
 	}
-	// cout << count << '\n';
 	return count < v ? true : false;
 }
 Vector3f Map::getBox_Color(int x, int y) const {
@@ -434,5 +433,3 @@ Vector3f Map::getBox_Color(int x, int y) const {
 Vector3f Map::getObject_Color(int x, int y) const {
 	return blocks[x][y].getObjectColor();
 }
-
-//

@@ -8,10 +8,10 @@ extern FrightenedTimer frightenedTimer;
 
 GhostRoom::GhostRoom() {
 	in_ghosts = { nullptr, nullptr, nullptr };
-	in_ghosts_time = { -1, -1, -1 };
+	in_ghosts_time = {-1, -1, -1};
 	in_time = 3000;
 	for (auto& ghost : in_ghosts) {
-		ghost = new Ghost();
+		ghost = new Ghost(); 
 	}
 	speed = 0.6f * MOVE_SPEED;
 	locate = 10;
@@ -23,7 +23,6 @@ void GhostRoom::moveGhostToRoom(Ghost& ghost, Ghost::GHOSTSTATE currState) {
 		currState = Ghost::FRIGHTENEND;
 	}
 	int i = getPossibleIndex(ghost);
-	//cout << i << '\n';
 	if (i == 3) {
 		ghost.setState(currState);
 		ghost.setChange_state(true);
@@ -296,7 +295,7 @@ void GhostRoom::moveGhostToMap(Ghost& ghost, Ghost::GHOSTSTATE currState) {
 		}
 	}
 	else if (i == 2) {
-		if (ghost.getCenter()[0] > LEFT_BOUNDARY + 13.5 * BLOCK_SIZE && ghost.getCenter()[1] < TOP_BOUNDARY - 11 * BLOCK_SIZE) {
+		if (ghost.getCenter()[0] > LEFT_BOUNDARY + 13.5 * BLOCK_SIZE && ghost.getCenter()[1] < TOP_BOUNDARY - 11 * BLOCK_SIZE)  {
 			ghost.setVelocity(-0.6f * MOVE_SPEED, 0.0f, 0.0f);
 			ghost.setCenter(ghost.getCenter() + ghost.getVelocity());
 		}
@@ -367,7 +366,7 @@ void GhostRoom::updatetime(int t) {
 	for (auto& i : in_ghosts_time) {
 		if (i != -1) {
 			i += t;
-		}
+		}	
 	}
 }
 
@@ -388,7 +387,7 @@ int GhostRoom::checktime() {
 }
 
 void GhostRoom::setGhostinIndex(Ghost& g, int i) {
-	in_ghosts[i] = &g;
+	in_ghosts[i] = & g;
 	in_ghosts_time[i] = 0;
 }
 
@@ -400,7 +399,7 @@ void GhostRoom::updatelocate() {
 			locate = TOP_BOUNDARY - 12 * BLOCK_SIZE - radius;
 			speed = -speed;
 		}
-
+			
 	}
 	else {
 		if (locate - radius <= TOP_BOUNDARY - 16 * BLOCK_SIZE) {
@@ -416,7 +415,7 @@ void GhostRoom::updatecenter() {
 		if (in_ghosts[i]->getGhostname() != Ghost::NONE && in_ghosts[i]->getVelocity()[0] == 0 && in_ghosts[i]->getVelocity()[1] == 0) {
 			if (i == 0) {
 				if (in_ghosts[i]->getCenter()[1] == 10) {
-					if (abs(locate - 10) <= 0.24)
+					if (abs(locate - 10)<=0.24)
 						in_ghosts[i]->setCenter(in_ghosts[i]->getCenter()[0], 20 - locate, 0.0f);
 				}
 				else {
@@ -438,7 +437,7 @@ void GhostRoom::updatecenter() {
 
 void GhostRoom::initialize() {
 	for (auto& ghost : in_ghosts) {
-		ghost = new Ghost();
+		ghost = new Ghost(); 
 	}
 	in_ghosts_time.fill(-1);
 }
